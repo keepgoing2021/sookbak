@@ -38,7 +38,8 @@ import {
   type ConstructionRiskInput,
 } from './constructionRisk'
 
-type CalculatorTab = 'direct' | 'rental'
+type CalculatorTab = 'direct' | 'rental' | 'risk'
+type RiskSourceMode = Exclude<CalculatorTab, 'risk'>
 
 type Values = {
   purchasePriceEok: string
@@ -78,13 +79,22 @@ const initialValues: Values = {
 const tabs: Array<{ key: CalculatorTab; label: string; eyebrow: string }> = [
   { key: 'direct', label: '직접 매입', eyebrow: '직접 매입 투자 의사결정 도구' },
   { key: 'rental', label: '임대 운영', eyebrow: '임대 운영 수익률 의사결정 도구' },
+  { key: 'risk', label: '공사·인허가', eyebrow: '공사·인허가 리스크 체크 도구' },
 ]
 
 function App() {
   const [activeTab, setActiveTab] = useState<CalculatorTab>('direct')
+  const [riskInitialMode, setRiskInitialMode] = useState<RiskSourceMode>('direct')
   const [directPropertyType, setDirectPropertyType] = useState<PropertyType>('commercial')
   const [directValues, setDirectValues] = useState<Values>(initialValues)
   const [rentalValues, setRentalValues] = useState<RentalValues>(initialRentalValues)
+
+  const selectTab = (tab: CalculatorTab) => {
+    setActiveTab(tab)
+    if (tab !== 'risk') {
+      setRiskInitialMode(tab)
+    }
+  }
 
   return (
     <main className="page-shell">
@@ -101,7 +111,7 @@ function App() {
               role="tab"
               aria-selected={activeTab === tab.key}
               className={activeTab === tab.key ? 'active' : ''}
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => selectTab(tab.key)}
             >
               {tab.label}
             </button>
@@ -115,16 +125,16 @@ function App() {
             values={directValues}
             setValues={setDirectValues}
           />
-        ) : (
+        ) : activeTab === 'rental' ? (
           <RentalCalculator values={rentalValues} setValues={setRentalValues} />
+        ) : (
+          <ConstructionRiskSection
+            directValues={directValues}
+            directPropertyType={directPropertyType}
+            rentalValues={rentalValues}
+            initialMode={riskInitialMode}
+          />
         )}
-
-        <ConstructionRiskSection
-          directValues={directValues}
-          directPropertyType={directPropertyType}
-          rentalValues={rentalValues}
-          initialMode={activeTab}
-        />
       </section>
     </main>
   )
@@ -914,9 +924,9 @@ function ConstructionRiskSection({
   directValues: Values
   directPropertyType: PropertyType
   rentalValues: RentalValues
-  initialMode: CalculatorTab
+  initialMode: RiskSourceMode
 }) {
-  const [sourceMode, setSourceMode] = useState<CalculatorTab>(initialMode)
+  const [sourceMode, setSourceMode] = useState<RiskSourceMode>(initialMode)
   const [form, setForm] = useState<RiskFormState>({
     roomCount: '',
     bathroomCount: '',
@@ -1006,14 +1016,23 @@ function ConstructionRiskSection({
   const sourceLabel = sourceMode === 'direct' ? '직접매입 데이터' : '임대 데이터'
 
   return (
-    <section className="advanced-panel risk-panel" aria-labelledby="risk-title">
-      <div className="advanced-heading">
-        <span className="section-index">06</span>
-        <div>
-          <h2 id="risk-title">공사·인허가 리스크 체크</h2>
-          <p>직접매입 또는 임대 운영 탭에 넣은 숫자를 불러와 공사 난이도와 인허가 변수를 같이 보는 섹션이에요.</p>
+    <>
+      <header className="hero-copy">
+        <p className="eyebrow">공사·인허가 리스크 체크 도구</p>
+        <h1 id="calculator-title">공사·인허가 리스크 체크</h1>
+        <p>
+          직접 매입 또는 임대 운영 탭에 넣은 숫자를 불러와 방 개수·화장실·방화창 같은 공사 난이도와 인허가 변수를 따로 점검해요.
+        </p>
+      </header>
+
+      <section className="advanced-panel risk-panel" aria-labelledby="risk-title">
+        <div className="advanced-heading">
+          <span className="section-index">06</span>
+          <div>
+            <h2 id="risk-title">6번 공사·인허가 리스크</h2>
+            <p>앞 탭의 데이터를 참고하되, 리스크 판단은 이 탭에서 별도로 입력·확인해요.</p>
+          </div>
         </div>
-      </div>
 
       <div className="linked-data-tabs" role="tablist" aria-label="리스크 연동 데이터 선택">
         <button
@@ -1111,10 +1130,10 @@ function ConstructionRiskSection({
       <p className="advanced-caveat">
         ※ 점수는 변동성 큰 항목을 빠르게 가늠하기 위한 스크리닝 지표예요. 실제 견적은 시공사 현장 실사가 필수예요.
       </p>
-    </section>
+      </section>
+    </>
   )
 }
-
 function LinkedMetric({ label, value }: { label: string; value: string }) {
   return (
     <div className="linked-metric">
