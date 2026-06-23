@@ -206,42 +206,53 @@ function DirectPurchaseCalculator() {
             ))}
           </div>
 
-          <MoneyInput
-            label="매매가"
-            placeholder="예: 12"
-            unit="억원"
-            value={values.purchasePriceEok}
-            onChange={(value) => updateFree('purchasePriceEok', value)}
-            help="매입하려는 실제 계약가를 입력하세요."
-          />
-          <MoneyInput
-            label="취득세"
-            unit="억원"
-            value={effective.acquisitionTaxEok}
-            onChange={(value) => updateAuto('acquisitionTaxEok', value)}
-            help="매매가 × 세율 자동 입력 (수정 가능)"
-          />
-          <MoneyInput
-            label="법무사 비용"
-            unit="억원"
-            value={effective.legalFeeEok}
-            onChange={(value) => updateAuto('legalFeeEok', value)}
-            help="3억미만 0.3% / 3~10억 0.2% / 10억+ 0.15% 자동 입력"
-          />
-          <MoneyInput
-            label="중개수수료"
-            unit="억원"
-            value={effective.brokerageFeeEok}
-            onChange={(value) => updateAuto('brokerageFeeEok', value)}
-            help="매매가 × 0.9% 자동 입력 (수정 가능)"
-          />
-          <MoneyInput
-            label="기타비용 (권리금 등)"
-            unit="억원"
-            value={values.otherCostEok}
-            onChange={(value) => updateFree('otherCostEok', value)}
-            help="권리금·시설비 등 회수 보장 안 되는 자금 → 자기자본에 묶여요"
-          />
+          <div className="primary-input-block">
+            <MoneyInput
+              label="매매가"
+              placeholder="예: 12"
+              unit="억원"
+              value={values.purchasePriceEok}
+              onChange={(value) => updateFree('purchasePriceEok', value)}
+              help="먼저 계약가만 넣으면 나머지 비용은 자동으로 잡혀요."
+            />
+          </div>
+
+          <details className="details-card" open={hasPurchasePrice}>
+            <summary>
+              <span>상세 비용 수정</span>
+              <small>자동 계산값 확인·수정</small>
+            </summary>
+            <div className="details-body">
+              <MoneyInput
+                label="취득세"
+                unit="억원"
+                value={effective.acquisitionTaxEok}
+                onChange={(value) => updateAuto('acquisitionTaxEok', value)}
+                help="매매가 × 세율 자동 입력"
+              />
+              <MoneyInput
+                label="법무사 비용"
+                unit="억원"
+                value={effective.legalFeeEok}
+                onChange={(value) => updateAuto('legalFeeEok', value)}
+                help="3억미만 0.3% / 3~10억 0.2% / 10억+ 0.15%"
+              />
+              <MoneyInput
+                label="중개수수료"
+                unit="억원"
+                value={effective.brokerageFeeEok}
+                onChange={(value) => updateAuto('brokerageFeeEok', value)}
+                help="매매가 × 0.9% 자동 입력"
+              />
+              <MoneyInput
+                label="기타비용 (권리금 등)"
+                unit="억원"
+                value={values.otherCostEok}
+                onChange={(value) => updateFree('otherCostEok', value)}
+                help="회수 보장 안 되는 자금은 별도로 보수적으로 잡으세요."
+              />
+            </div>
+          </details>
         </section>
 
         <section className="right-column">
