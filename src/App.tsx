@@ -33,10 +33,9 @@ import {
   type ScenarioKey,
 } from './rentalCalculator'
 import {
-  calculateConstructionRisk,
-  describeRiskLevel,
-  type ConstructionRiskInput,
-} from './constructionRisk'
+  buildConstructionChecklist,
+  type ConstructionChecklistInput,
+} from './constructionChecklist'
 
 type CalculatorTab = 'direct' | 'rental' | 'risk'
 type RiskSourceMode = Exclude<CalculatorTab, 'risk'>
@@ -889,45 +888,6 @@ type RiskFormState = {
   windowReduction: boolean
 }
 
-const RISK_GUIDANCE: Array<{ title: string; body: string }> = [
-  {
-    title: '방·화장실 개수',
-    body: '기본 1실·1욕실은 일반 난이도로 보고, 2개 이상부터 견적·일정 변동 리스크로 봐요.',
-  },
-  {
-    title: '난방 방식',
-    body: '도시가스 보일러가 LPG보다 운영에 유리해요. 화장실 바닥난방은 만족도 대비 효율이 높은 옵션이에요.',
-  },
-  {
-    title: '소방·전기·방염',
-    body: '법적 의무 항목이라 별도 예산으로 잡아야 해요. 검사 통과 전에는 영업을 시작하기 어려워요.',
-  },
-  {
-    title: '제작가구',
-    body: '기성품보다 비싸지만 좁은 공간 효율과 디자인 일관성에 유리해요. 핵심 포인트 위주 적용을 권장해요.',
-  },
-  {
-    title: '방수',
-    body: '누수·재공사 리스크를 줄이는 항목이에요. 화장실·욕조·창호 주변은 견적에서 빼지 않는 편이 안전해요.',
-  },
-  {
-    title: '조적욕조',
-    body: '사진 효과와 차별화는 강하지만 방수 난이도와 누수 리스크가 커요. 검증된 시공팀이 필요해요.',
-  },
-  {
-    title: '필증·행정대행',
-    body: '소방·전기 필증, 행정대행, 면허업체 비용은 기본 견적에 빠지는 경우가 많아요. 별도 라인으로 확보하세요.',
-  },
-  {
-    title: '방화창',
-    body: '소방서 판단이나 건축 연한에 따라 갑자기 의무가 될 수 있어요. 예비비 5–10%를 권장해요.',
-  },
-  {
-    title: '창문 축소',
-    body: '조적·방수·단열·스카이차가 묶여 비용이 커질 수 있어요. 꼭 필요한 경우인지 먼저 확인하세요.',
-  },
-]
-
 function ConstructionRiskSection({
   directValues,
   directPropertyType,
@@ -1007,7 +967,7 @@ function ConstructionRiskSection({
   }
   const rentalResult = calculateRental(rentalInput)
 
-  const riskInput: ConstructionRiskInput = useMemo(
+  const checklistInput: ConstructionChecklistInput = useMemo(
     () => ({
       roomCount: syncedRoomCount,
       bathroomCount: toNumber(form.bathroomCount),
@@ -1018,23 +978,16 @@ function ConstructionRiskSection({
     [form, syncedRoomCount],
   )
 
-  const risk = useMemo(() => calculateConstructionRisk(riskInput), [riskInput])
-  const badge = describeRiskLevel(risk.level)
-  const hasAnyInput =
-    riskInput.roomCount > 0 ||
-    riskInput.bathroomCount > 0 ||
-    riskInput.fireWindowLikely ||
-    riskInput.masonryTub ||
-    riskInput.windowReduction
+  const checklist = useMemo(() => buildConstructionChecklist(checklistInput), [checklistInput])
   const sourceLabel = sourceMode === 'direct' ? '직접매입 데이터' : '임대 데이터'
 
   return (
     <>
       <header className="hero-copy">
-        <p className="eyebrow">공사·인허가 리스크 체크 도구</p>
-        <h1 id="calculator-title">공사·인허가 리스크 체크</h1>
+        <p className="eyebrow">호스텔 공사 체크리스트</p>
+        <h1 id="calculator-title">시니어 기획자 공사 검토 체크리스트</h1>
         <p>
-          직접 매입 또는 임대 운영 탭에 넣은 숫자를 불러와 방 개수·화장실·방화창 같은 공사 난이도와 인허가 변수를 따로 점검해요.
+          점수로 단순 판정하지 않고, 호스텔 전환 전에 시니어 기획자가 확인할 공사·인허가·운영 리스크를 체크리스트로 정리해요.
         </p>
       </header>
 
@@ -1042,8 +995,8 @@ function ConstructionRiskSection({
         <div className="advanced-heading">
           <span className="section-index">06</span>
           <div>
-            <h2 id="risk-title">6번 공사·인허가 리스크</h2>
-            <p>앞 탭의 데이터를 참고하되, 리스크 판단은 이 탭에서 별도로 입력·확인해요.</p>
+            <h2 id="risk-title">6번 시니어 검토 체크리스트</h2>
+            <p>{sourceLabel}를 참고해 공사 전에 빠뜨리면 안 되는 확인 항목만 정리했어요.</p>
           </div>
         </div>
 
@@ -1116,35 +1069,40 @@ function ConstructionRiskSection({
         />
       </div>
 
-      <div className={`risk-summary risk-tone-${badge.tone}`}>
+      <div className="risk-summary checklist-summary">
         <div>
-          <span>리스크 점수</span>
-          <strong>{risk.score}</strong>
+          <span>검토 방식</span>
+          <strong>체크리스트</strong>
         </div>
-        <div className={`risk-badge risk-badge-${badge.tone}`}>{badge.label}</div>
-        <ul>
-          {hasAnyInput && risk.drivers.length > 0 ? (
-            risk.drivers.map((driver) => <li key={driver}>{driver}</li>)
-          ) : (
-            <li className="muted">{sourceLabel} 기준 두드러지는 리스크 드라이버 없음</li>
-          )}
-        </ul>
+        <p>
+          {sourceLabel} 기준으로 산식 점수는 제거했어요. 방·화장실 수가 많아도 등급으로 단정하지 않고,
+          실제로 확인해야 할 공정·필증·운영 동선을 항목별로 점검합니다.
+        </p>
       </div>
 
-      <div className="risk-cards">
-        {RISK_GUIDANCE.map((card, index) => (
-          <article key={card.title} className="risk-card">
+      <div className="risk-cards checklist-cards">
+        {checklist.map((item, index) => (
+          <article key={item.title} className="risk-card checklist-card">
             <span className="risk-card-index">{String(index + 1).padStart(2, '0')}</span>
             <div>
-              <h3>{card.title}</h3>
-              <p>{card.body}</p>
+              <div className="checklist-card-head">
+                <span>{item.category}</span>
+                <em>{item.priority}</em>
+              </div>
+              <h3>{item.title}</h3>
+              <p>{item.summary}</p>
+              <ul>
+                {item.checks.map((check) => (
+                  <li key={check}>{check}</li>
+                ))}
+              </ul>
             </div>
           </article>
         ))}
       </div>
 
       <p className="advanced-caveat">
-        ※ 점수는 변동성 큰 항목을 빠르게 가늠하기 위한 스크리닝 지표예요. 실제 견적은 시공사 현장 실사가 필수예요.
+        ※ 이 체크리스트는 공사 전 누락 항목을 줄이기 위한 기획 검토용이에요. 실제 견적·필증·인허가는 현장 실사와 면허업체 확인이 필요해요.
       </p>
       </section>
     </>

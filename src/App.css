@@ -1808,3 +1808,95 @@ h1,
 .scenario.no-loan strong {
   color: #020617;
 }
+
+
+/* Senior planner checklist treatment */
+.checklist-summary {
+  grid-template-columns: minmax(170px, auto) 1fr;
+  align-items: start;
+}
+
+.checklist-summary p {
+  margin: 0;
+  color: #334155;
+  font-size: 13.5px;
+  line-height: 1.65;
+  word-break: keep-all;
+}
+
+.checklist-cards {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.checklist-card {
+  grid-template-columns: auto 1fr;
+  padding: 18px;
+  background: #f8fbff;
+}
+
+.checklist-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+}
+
+.checklist-card-head span {
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.checklist-card-head em {
+  flex: 0 0 auto;
+  padding: 4px 9px;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1e40af;
+  font-style: normal;
+  font-size: 11.5px;
+  font-weight: 850;
+}
+
+.checklist-card ul {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checklist-card li {
+  position: relative;
+  padding-left: 20px;
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.checklist-card li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #2563eb;
+  font-weight: 900;
+}
+
+@media (max-width: 720px) {
+  .checklist-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .checklist-card {
+    grid-template-columns: 1fr;
+  }
+
+  .checklist-card-head {
+    align-items: flex-start;
+  }
+}
