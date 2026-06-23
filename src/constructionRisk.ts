@@ -15,8 +15,8 @@ export interface ConstructionRiskResult {
 }
 
 export const RISK_WEIGHTS = {
-  perRoom: 4,
-  perBathroom: 15,
+  perExtraRoom: 4,
+  perExtraBathroom: 15,
   fireWindow: 12,
   masonryTub: 10,
   windowReduction: 14,
@@ -26,14 +26,16 @@ export function calculateConstructionRisk(input: ConstructionRiskInput): Constru
   const drivers: string[] = []
   let score = 0
 
-  if (input.roomCount > 0) {
-    score += input.roomCount * RISK_WEIGHTS.perRoom
+  const extraRooms = Math.max(0, input.roomCount - 1)
+  const extraBathrooms = Math.max(0, input.bathroomCount - 1)
+
+  if (extraRooms > 0) {
+    score += extraRooms * RISK_WEIGHTS.perExtraRoom
+    drivers.push(`방 ${input.roomCount}개 — 기본 1개 초과분이 공사 범위를 키움`)
   }
-  if (input.bathroomCount > 0) {
-    score += input.bathroomCount * RISK_WEIGHTS.perBathroom
-    if (input.bathroomCount >= 2) {
-      drivers.push(`화장실 ${input.bathroomCount}개 — 견적 변동 폭이 가장 큰 항목`)
-    }
+  if (extraBathrooms > 0) {
+    score += extraBathrooms * RISK_WEIGHTS.perExtraBathroom
+    drivers.push(`화장실 ${input.bathroomCount}개 — 기본 1개 초과분이 견적 변동 폭을 키움`)
   }
   if (input.fireWindowLikely) {
     score += RISK_WEIGHTS.fireWindow

@@ -985,19 +985,37 @@ h1 {
 
 .risk-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
 .risk-card {
-  padding: 14px;
-  border-radius: 12px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 12px;
+  min-height: 0;
+  padding: 14px 16px;
+  border-radius: 14px;
   background: #fbfdff;
   border: 1px solid #e3eaf5;
+  text-align: left;
+}
+
+.risk-card-index {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-size: 12px;
+  font-weight: 850;
 }
 
 .risk-card h3 {
-  margin: 0 0 6px;
+  margin: 0 0 4px;
   font-size: 14px;
   letter-spacing: -0.02em;
   color: #101827;
@@ -1006,8 +1024,10 @@ h1 {
 .risk-card p {
   margin: 0;
   color: #5f6c82;
-  font-size: 12.5px;
+  font-size: 13px;
   line-height: 1.55;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 880px) {
@@ -1017,7 +1037,8 @@ h1 {
     grid-template-columns: 1fr;
   }
 
-  .risk-summary {
+  .risk-summary,
+  .risk-cards {
     grid-template-columns: 1fr;
   }
 }
