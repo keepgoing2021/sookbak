@@ -1,4 +1,5 @@
 export interface RentalCalculatorInput {
+  roomCount?: number
   nightlyPriceManwon: number
   occupancyPercent: number
   airbnbFeePercent: number
@@ -132,8 +133,9 @@ export function compareManagedVsDirect(input: ManagedComparisonInput): ManagedCo
 }
 
 export function calculateRental(input: RentalCalculatorInput): RentalCalculatorResult {
+  const roomCount = input.roomCount && input.roomCount > 0 ? input.roomCount : 1
   const monthlyRevenueManwon = roundManwon(
-    input.nightlyPriceManwon * 30 * (input.occupancyPercent / 100),
+    input.nightlyPriceManwon * roomCount * 30 * (input.occupancyPercent / 100),
   )
   const airbnbFeeManwon = roundManwon(
     monthlyRevenueManwon * (input.airbnbFeePercent / 100),

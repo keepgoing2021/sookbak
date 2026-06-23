@@ -112,6 +112,18 @@ describe('rental calculator', () => {
     expect(result.airbnbFeeManwon).toBe(0)
     expect(result.monthlyNetManwon).toBe(360 - 25)
   })
+
+  it('multiplies monthly revenue by room count', () => {
+    const result = calculateRental({
+      ...base,
+      roomCount: 3,
+      nightlyPriceManwon: 20,
+      occupancyPercent: 50,
+      airbnbFeePercent: 0,
+    })
+
+    expect(result.monthlyRevenueManwon).toBe(900)
+  })
 })
 
 describe('scenario defaults', () => {
