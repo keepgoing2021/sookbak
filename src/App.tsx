@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react'
 import './App.css'
 import {
   type PropertyType,
@@ -82,6 +82,9 @@ const tabs: Array<{ key: CalculatorTab; label: string; eyebrow: string }> = [
 
 function App() {
   const [activeTab, setActiveTab] = useState<CalculatorTab>('direct')
+  const [directPropertyType, setDirectPropertyType] = useState<PropertyType>('commercial')
+  const [directValues, setDirectValues] = useState<Values>(initialValues)
+  const [rentalValues, setRentalValues] = useState<RentalValues>(initialRentalValues)
 
   return (
     <main className="page-shell">
@@ -105,16 +108,39 @@ function App() {
           ))}
         </div>
 
-        {activeTab === 'direct' ? <DirectPurchaseCalculator /> : <RentalCalculator />}
+        {activeTab === 'direct' ? (
+          <DirectPurchaseCalculator
+            propertyType={directPropertyType}
+            setPropertyType={setDirectPropertyType}
+            values={directValues}
+            setValues={setDirectValues}
+          />
+        ) : (
+          <RentalCalculator values={rentalValues} setValues={setRentalValues} />
+        )}
+
+        <ConstructionRiskSection
+          directValues={directValues}
+          directPropertyType={directPropertyType}
+          rentalValues={rentalValues}
+          initialMode={activeTab}
+        />
       </section>
     </main>
   )
 }
 
-function DirectPurchaseCalculator() {
-  const [propertyType, setPropertyType] = useState<PropertyType>('commercial')
-  const [values, setValues] = useState<Values>(initialValues)
-
+function DirectPurchaseCalculator({
+  propertyType,
+  setPropertyType,
+  values,
+  setValues,
+}: {
+  propertyType: PropertyType
+  setPropertyType: (value: PropertyType) => void
+  values: Values
+  setValues: Dispatch<SetStateAction<Values>>
+}) {
   const purchasePriceEok = toNumber(values.purchasePriceEok)
   const hasPurchasePrice = purchasePriceEok > 0
 
@@ -299,6 +325,7 @@ function DirectPurchaseCalculator() {
 }
 
 type RentalValues = {
+  roomCount: string
   nightlyPriceManwon: string
   occupancyPercent: string
   airbnbFeePercent: string
@@ -316,6 +343,7 @@ type RentalValues = {
 }
 
 const initialRentalValues: RentalValues = {
+  roomCount: '1',
   nightlyPriceManwon: '',
   occupancyPercent: '',
   airbnbFeePercent: String(DEFAULT_AIRBNB_FEE_PERCENT),
@@ -332,15 +360,21 @@ const initialRentalValues: RentalValues = {
   maintenanceManwon: '',
 }
 
-function RentalCalculator() {
-  const [values, setValues] = useState<RentalValues>(initialRentalValues)
-
+function RentalCalculator({
+  values,
+  setValues,
+}: {
+  values: RentalValues
+  setValues: Dispatch<SetStateAction<RentalValues>>
+}) {
+  const roomCount = toNumber(values.roomCount)
   const nightlyPrice = toNumber(values.nightlyPriceManwon)
   const occupancy = toNumber(values.occupancyPercent)
   const hasRevenueInputs = nightlyPrice > 0 && occupancy > 0
 
   const input = useMemo(
     () => ({
+      roomCount,
       nightlyPriceManwon: nightlyPrice,
       occupancyPercent: occupancy,
       airbnbFeePercent: toNumber(values.airbnbFeePercent),
@@ -357,6 +391,7 @@ function RentalCalculator() {
       maintenanceManwon: toNumber(values.maintenanceManwon),
     }),
     [
+      roomCount,
       nightlyPrice,
       occupancy,
       values.airbnbFeePercent,
@@ -397,6 +432,15 @@ function RentalCalculator() {
               <span className="section-index">01</span>
               <h2 id="income-title">수입</h2>
             </div>
+            <MoneyInput
+              label="방 개수"
+              unit="개"
+              placeholder="예: 3"
+              value={values.roomCount}
+              onChange={(value) => update('roomCount', value)}
+              help="방별 판매가 같다는 가정으로 전체 월 매출에 곱해져요."
+              inputMode="numeric"
+            />
             <MoneyInput
               label="1박 가격"
               unit="만원"
@@ -531,8 +575,6 @@ function RentalCalculator() {
         monthlyRevenueManwon={result.monthlyRevenueManwon}
         monthlyNetManwon={result.monthlyNetManwon}
       />
-
-      <ConstructionRiskSection />
 
       <aside className="notice">
         <strong>읽는 법</strong>
@@ -863,7 +905,18 @@ const RISK_GUIDANCE: Array<{ title: string; body: string }> = [
   },
 ]
 
-function ConstructionRiskSection() {
+function ConstructionRiskSection({
+  directValues,
+  directPropertyType,
+  rentalValues,
+  initialMode,
+}: {
+  directValues: Values
+  directPropertyType: PropertyType
+  rentalValues: RentalValues
+  initialMode: CalculatorTab
+}) {
+  const [sourceMode, setSourceMode] = useState<CalculatorTab>(initialMode)
   const [form, setForm] = useState<RiskFormState>({
     roomCount: '',
     bathroomCount: '',
@@ -872,15 +925,74 @@ function ConstructionRiskSection() {
     windowReduction: false,
   })
 
+  useEffect(() => {
+    setSourceMode(initialMode)
+  }, [initialMode])
+
+  const rentalRoomCount = toNumber(rentalValues.roomCount)
+  const syncedRoomCount = sourceMode === 'rental' && rentalRoomCount > 0
+    ? rentalRoomCount
+    : toNumber(form.roomCount)
+
+  const directPurchasePrice = toNumber(directValues.purchasePriceEok)
+  const directEffective = {
+    acquisitionTaxEok:
+      directValues.acquisitionTaxEok === null
+        ? defaultAcquisitionTaxEok(directPropertyType, directPurchasePrice)
+        : toNumber(directValues.acquisitionTaxEok),
+    legalFeeEok:
+      directValues.legalFeeEok === null
+        ? defaultLegalFeeEok(directPurchasePrice)
+        : toNumber(directValues.legalFeeEok),
+    brokerageFeeEok:
+      directValues.brokerageFeeEok === null
+        ? defaultBrokerageFeeEok(directPurchasePrice)
+        : toNumber(directValues.brokerageFeeEok),
+    loanAmountEok:
+      directValues.loanAmountEok === null
+        ? defaultLoanAmountEok(directPurchasePrice)
+        : toNumber(directValues.loanAmountEok),
+  }
+  const directResult = calculateInvestment({
+    propertyType: directPropertyType,
+    purchasePriceEok: directPurchasePrice,
+    acquisitionTaxEok: directEffective.acquisitionTaxEok,
+    legalFeeEok: directEffective.legalFeeEok,
+    brokerageFeeEok: directEffective.brokerageFeeEok,
+    otherCostEok: toNumber(directValues.otherCostEok),
+    loanAmountEok: directEffective.loanAmountEok,
+    annualInterestRate: toNumber(directValues.annualInterestRate),
+    monthlyRevenueManwon: toNumber(directValues.monthlyRevenueManwon),
+  })
+
+  const rentalInput: RentalCalculatorInput = {
+    roomCount: rentalRoomCount,
+    nightlyPriceManwon: toNumber(rentalValues.nightlyPriceManwon),
+    occupancyPercent: toNumber(rentalValues.occupancyPercent),
+    airbnbFeePercent: toNumber(rentalValues.airbnbFeePercent),
+    depositManwon: toNumber(rentalValues.depositManwon),
+    interiorCostManwon: toNumber(rentalValues.interiorCostManwon),
+    rentManwon: toNumber(rentalValues.rentManwon),
+    electricityManwon: toNumber(rentalValues.electricityManwon),
+    gasManwon: toNumber(rentalValues.gasManwon),
+    internetManwon: toNumber(rentalValues.internetManwon),
+    waterManwon: toNumber(rentalValues.waterManwon),
+    cleaningManwon: toNumber(rentalValues.cleaningManwon),
+    suppliesManwon: toNumber(rentalValues.suppliesManwon),
+    pestControlManwon: toNumber(rentalValues.pestControlManwon),
+    maintenanceManwon: toNumber(rentalValues.maintenanceManwon),
+  }
+  const rentalResult = calculateRental(rentalInput)
+
   const riskInput: ConstructionRiskInput = useMemo(
     () => ({
-      roomCount: toNumber(form.roomCount),
+      roomCount: syncedRoomCount,
       bathroomCount: toNumber(form.bathroomCount),
       fireWindowLikely: form.fireWindowLikely,
       masonryTub: form.masonryTub,
       windowReduction: form.windowReduction,
     }),
-    [form],
+    [form, syncedRoomCount],
   )
 
   const risk = useMemo(() => calculateConstructionRisk(riskInput), [riskInput])
@@ -891,6 +1003,7 @@ function ConstructionRiskSection() {
     riskInput.fireWindowLikely ||
     riskInput.masonryTub ||
     riskInput.windowReduction
+  const sourceLabel = sourceMode === 'direct' ? '직접매입 데이터' : '임대 데이터'
 
   return (
     <section className="advanced-panel risk-panel" aria-labelledby="risk-title">
@@ -898,15 +1011,54 @@ function ConstructionRiskSection() {
         <span className="section-index">06</span>
         <div>
           <h2 id="risk-title">공사·인허가 리스크 체크</h2>
-          <p>견적 산정 전 변동성 큰 항목을 미리 인지하기 위한 스크리닝 가이드예요. 시공사 견적을 대신하지 않아요.</p>
+          <p>직접매입 또는 임대 운영 탭에 넣은 숫자를 불러와 공사 난이도와 인허가 변수를 같이 보는 섹션이에요.</p>
         </div>
+      </div>
+
+      <div className="linked-data-tabs" role="tablist" aria-label="리스크 연동 데이터 선택">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={sourceMode === 'direct'}
+          className={sourceMode === 'direct' ? 'active' : ''}
+          onClick={() => setSourceMode('direct')}
+        >
+          직접매입 데이터
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={sourceMode === 'rental'}
+          className={sourceMode === 'rental' ? 'active' : ''}
+          onClick={() => setSourceMode('rental')}
+        >
+          임대 데이터
+        </button>
+      </div>
+
+      <div className="linked-data-panel">
+        {sourceMode === 'direct' ? (
+          <>
+            <LinkedMetric label="매물 종류" value={propertyTypes.find((item) => item.key === directPropertyType)?.label ?? '-'} />
+            <LinkedMetric label="매매가" value={directPurchasePrice > 0 ? formatEok(directPurchasePrice) : '미입력'} />
+            <LinkedMetric label="총투입금" value={directPurchasePrice > 0 ? formatEok(directResult.totalInvestmentEok) : '미입력'} />
+            <LinkedMetric label="월 순수익" value={directPurchasePrice > 0 ? formatManwon(directResult.monthlyNetManwon) : '미입력'} />
+          </>
+        ) : (
+          <>
+            <LinkedMetric label="방 개수" value={rentalRoomCount > 0 ? `${rentalRoomCount}개` : '미입력'} />
+            <LinkedMetric label="월 매출" value={rentalResult.monthlyRevenueManwon > 0 ? formatManwonSigned(rentalResult.monthlyRevenueManwon) : '미입력'} />
+            <LinkedMetric label="월 순수익" value={rentalResult.monthlyNetManwon !== 0 ? formatManwonSigned(rentalResult.monthlyNetManwon) : '미입력'} />
+            <LinkedMetric label="회수기간" value={formatPaybackMonths(rentalResult.paybackMonths)} />
+          </>
+        )}
       </div>
 
       <div className="risk-inputs">
         <ScenarioMiniInput
-          label="방 개수"
+          label={sourceMode === 'rental' && rentalRoomCount > 0 ? '방 개수 · 임대 입력 연동' : '방 개수'}
           unit="개"
-          value={form.roomCount}
+          value={sourceMode === 'rental' && rentalRoomCount > 0 ? String(rentalRoomCount) : form.roomCount}
           onChange={(value) => setForm((prev) => ({ ...prev, roomCount: value }))}
         />
         <ScenarioMiniInput
@@ -942,7 +1094,7 @@ function ConstructionRiskSection() {
           {hasAnyInput && risk.drivers.length > 0 ? (
             risk.drivers.map((driver) => <li key={driver}>{driver}</li>)
           ) : (
-            <li className="muted">입력값 기준 두드러지는 리스크 드라이버 없음</li>
+            <li className="muted">{sourceLabel} 기준 두드러지는 리스크 드라이버 없음</li>
           )}
         </ul>
       </div>
@@ -960,6 +1112,15 @@ function ConstructionRiskSection() {
         ※ 점수는 변동성 큰 항목을 빠르게 가늠하기 위한 스크리닝 지표예요. 실제 견적은 시공사 현장 실사가 필수예요.
       </p>
     </section>
+  )
+}
+
+function LinkedMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="linked-metric">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
   )
 }
 
