@@ -15,6 +15,11 @@ describe('direct purchase calculator', () => {
     expect(defaultLoanAmountEok(12)).toBe(8.4)
   })
 
+  it('auto-calculates default loan amount from a custom LTV percent', () => {
+    expect(defaultLoanAmountEok(12, 60)).toBe(7.2)
+    expect(defaultLoanAmountEok(12, 80)).toBe(9.6)
+  })
+
   it('calculates leverage and no-loan ROI in manwon/eok units', () => {
     const result = calculateInvestment({
       propertyType: 'commercial',

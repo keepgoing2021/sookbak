@@ -48,6 +48,7 @@ type Values = {
   brokerageFeeEok: string | null
   otherCostEok: string
   loanAmountEok: string | null
+  ltvPercent: string
   annualInterestRate: string
   monthlyRevenueManwon: string
 }
@@ -56,6 +57,7 @@ type AutoFieldKey = 'acquisitionTaxEok' | 'legalFeeEok' | 'brokerageFeeEok' | 'l
 type FreeFieldKey =
   | 'purchasePriceEok'
   | 'otherCostEok'
+  | 'ltvPercent'
   | 'annualInterestRate'
   | 'monthlyRevenueManwon'
 
@@ -72,6 +74,7 @@ const initialValues: Values = {
   brokerageFeeEok: null,
   otherCostEok: '',
   loanAmountEok: null,
+  ltvPercent: '70',
   annualInterestRate: '4.5',
   monthlyRevenueManwon: '',
 }
@@ -154,6 +157,8 @@ function DirectPurchaseCalculator({
   const purchasePriceEok = toNumber(values.purchasePriceEok)
   const hasPurchasePrice = purchasePriceEok > 0
 
+  const ltvPercent = toNumber(values.ltvPercent)
+
   const autoDefaults = useMemo(() => {
     if (!hasPurchasePrice) {
       return { acquisitionTaxEok: '', legalFeeEok: '', brokerageFeeEok: '', loanAmountEok: '' }
@@ -162,9 +167,9 @@ function DirectPurchaseCalculator({
       acquisitionTaxEok: stringify(defaultAcquisitionTaxEok(propertyType, purchasePriceEok)),
       legalFeeEok: stringify(defaultLegalFeeEok(purchasePriceEok)),
       brokerageFeeEok: stringify(defaultBrokerageFeeEok(purchasePriceEok)),
-      loanAmountEok: stringify(defaultLoanAmountEok(purchasePriceEok)),
+      loanAmountEok: stringify(defaultLoanAmountEok(purchasePriceEok, ltvPercent)),
     }
-  }, [propertyType, purchasePriceEok, hasPurchasePrice])
+  }, [propertyType, purchasePriceEok, ltvPercent, hasPurchasePrice])
 
   const effective = {
     acquisitionTaxEok: values.acquisitionTaxEok ?? autoDefaults.acquisitionTaxEok,
@@ -298,11 +303,19 @@ function DirectPurchaseCalculator({
               <h2 id="loan-title">대출 & 운영 입력</h2>
             </div>
             <MoneyInput
+              label="LTV"
+              unit="%"
+              value={values.ltvPercent}
+              onChange={(value) => updateFree('ltvPercent', value)}
+              help="매매가 대비 대출 비율을 직접 조절하세요. 기본 70%."
+              inputMode="decimal"
+            />
+            <MoneyInput
               label="대출금액"
               unit="억원"
               value={effective.loanAmountEok}
               onChange={(value) => updateAuto('loanAmountEok', value)}
-              help="매매가 × 70% 자동 입력 (수정 가능)"
+              help={`매매가 × LTV ${values.ltvPercent || 0}% 자동 입력 (금액 직접 수정 가능)`}
             />
             <MoneyInput
               label="대출 금리 (연)"
@@ -960,7 +973,7 @@ function ConstructionRiskSection({
         : toNumber(directValues.brokerageFeeEok),
     loanAmountEok:
       directValues.loanAmountEok === null
-        ? defaultLoanAmountEok(directPurchasePrice)
+        ? defaultLoanAmountEok(directPurchasePrice, toNumber(directValues.ltvPercent))
         : toNumber(directValues.loanAmountEok),
   }
   const directResult = calculateInvestment({

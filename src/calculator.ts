@@ -54,8 +54,8 @@ export function defaultBrokerageFeeEok(purchasePriceEok: number): number {
   return roundEok(purchasePriceEok * 0.009)
 }
 
-export function defaultLoanAmountEok(purchasePriceEok: number): number {
-  return roundEok(purchasePriceEok * 0.7)
+export function defaultLoanAmountEok(purchasePriceEok: number, ltvPercent = 70): number {
+  return roundEok(purchasePriceEok * (ltvPercent / 100))
 }
 
 export function calculateInvestment(input: CalculatorInput): CalculatorResult {
