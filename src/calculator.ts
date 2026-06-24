@@ -9,6 +9,8 @@ export interface CalculatorInput {
   otherCostEok: number
   loanAmountEok: number
   annualInterestRate: number
+  tourismLoanAmountEok?: number
+  tourismLoanAnnualInterestRate?: number
   monthlyRevenueManwon: number
 }
 
@@ -17,6 +19,8 @@ export interface CalculatorResult {
   totalInvestmentEok: number
   cashInvestedWithLoanEok: number
   monthlyInterestManwon: number
+  tourismLoanMonthlyInterestManwon: number
+  totalMonthlyInterestManwon: number
   monthlyNetManwon: number
   annualNetManwon: number
   annualRevenueManwon: number
@@ -67,7 +71,16 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
   const monthlyInterestManwon = roundManwon(
     (input.loanAmountEok * 10000 * (input.annualInterestRate / 100)) / 12,
   )
-  const monthlyNetManwon = roundManwon(input.monthlyRevenueManwon - monthlyInterestManwon)
+  const tourismLoanMonthlyInterestManwon = roundManwon(
+    ((input.tourismLoanAmountEok ?? 0) *
+      10000 *
+      ((input.tourismLoanAnnualInterestRate ?? 0) / 100)) /
+      12,
+  )
+  const totalMonthlyInterestManwon = roundManwon(
+    monthlyInterestManwon + tourismLoanMonthlyInterestManwon,
+  )
+  const monthlyNetManwon = roundManwon(input.monthlyRevenueManwon - totalMonthlyInterestManwon)
   const annualNetManwon = roundManwon(monthlyNetManwon * 12)
   const annualRevenueManwon = roundManwon(input.monthlyRevenueManwon * 12)
   const roiWithLoanPercent = cashInvestedWithLoanEok > 0
@@ -82,6 +95,8 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
     totalInvestmentEok,
     cashInvestedWithLoanEok,
     monthlyInterestManwon,
+    tourismLoanMonthlyInterestManwon,
+    totalMonthlyInterestManwon,
     monthlyNetManwon,
     annualNetManwon,
     annualRevenueManwon,

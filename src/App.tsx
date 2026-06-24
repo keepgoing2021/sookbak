@@ -49,6 +49,8 @@ type Values = {
   loanAmountEok: string | null
   ltvPercent: string
   annualInterestRate: string
+  tourismLoanAmountEok: string
+  tourismLoanAnnualInterestRate: string
   monthlyRevenueManwon: string
 }
 
@@ -58,6 +60,8 @@ type FreeFieldKey =
   | 'otherCostEok'
   | 'ltvPercent'
   | 'annualInterestRate'
+  | 'tourismLoanAmountEok'
+  | 'tourismLoanAnnualInterestRate'
   | 'monthlyRevenueManwon'
 
 const propertyTypes: Array<{ key: PropertyType; label: string; description: string }> = [
@@ -75,6 +79,8 @@ const initialValues: Values = {
   loanAmountEok: null,
   ltvPercent: '70',
   annualInterestRate: '4.5',
+  tourismLoanAmountEok: '',
+  tourismLoanAnnualInterestRate: '2.0',
   monthlyRevenueManwon: '',
 }
 
@@ -187,6 +193,8 @@ function DirectPurchaseCalculator({
       otherCostEok: toNumber(values.otherCostEok),
       loanAmountEok: toNumber(effective.loanAmountEok),
       annualInterestRate: toNumber(values.annualInterestRate),
+      tourismLoanAmountEok: toNumber(values.tourismLoanAmountEok),
+      tourismLoanAnnualInterestRate: toNumber(values.tourismLoanAnnualInterestRate),
       monthlyRevenueManwon: toNumber(values.monthlyRevenueManwon),
     }),
     [
@@ -198,6 +206,8 @@ function DirectPurchaseCalculator({
       effective.loanAmountEok,
       values.otherCostEok,
       values.annualInterestRate,
+      values.tourismLoanAmountEok,
+      values.tourismLoanAnnualInterestRate,
       values.monthlyRevenueManwon,
     ],
   )
@@ -321,6 +331,21 @@ function DirectPurchaseCalculator({
               unit="%"
               value={values.annualInterestRate}
               onChange={(value) => updateFree('annualInterestRate', value)}
+              inputMode="decimal"
+            />
+            <MoneyInput
+              label="관광기금 대출금액 (공사비)"
+              unit="억원"
+              value={values.tourismLoanAmountEok}
+              onChange={(value) => updateFree('tourismLoanAmountEok', value)}
+              help="공사비로 받는 관광기금 대출이 있으면 입력하세요."
+            />
+            <MoneyInput
+              label="관광기금 금리 (연)"
+              unit="%"
+              value={values.tourismLoanAnnualInterestRate}
+              onChange={(value) => updateFree('tourismLoanAnnualInterestRate', value)}
+              help="관광기금 대출금액에만 적용되는 별도 금리예요."
               inputMode="decimal"
             />
             <MoneyInput
@@ -945,6 +970,8 @@ function ConstructionRiskSection({
     otherCostEok: toNumber(directValues.otherCostEok),
     loanAmountEok: directEffective.loanAmountEok,
     annualInterestRate: toNumber(directValues.annualInterestRate),
+    tourismLoanAmountEok: toNumber(directValues.tourismLoanAmountEok),
+    tourismLoanAnnualInterestRate: toNumber(directValues.tourismLoanAnnualInterestRate),
     monthlyRevenueManwon: toNumber(directValues.monthlyRevenueManwon),
   })
 
@@ -1195,7 +1222,9 @@ function DirectResultPanel({
       <div className="result-summary">
         <Metric label="부대비용 합계" value={formatEok(result.sideCostsEok)} />
         <Metric label="총투입금" value={formatEok(result.totalInvestmentEok)} />
-        <Metric label="월 이자" value={formatManwon(result.monthlyInterestManwon)} />
+        <Metric label="담보대출 월이자" value={formatManwon(result.monthlyInterestManwon)} />
+        <Metric label="관광기금 월이자" value={formatManwon(result.tourismLoanMonthlyInterestManwon)} />
+        <Metric label="총 월이자" value={formatManwon(result.totalMonthlyInterestManwon)} />
         <Metric label="월 순수익" value={formatManwon(result.monthlyNetManwon)} highlight />
       </div>
 
