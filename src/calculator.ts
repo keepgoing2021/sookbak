@@ -62,6 +62,11 @@ export function defaultLoanAmountEok(purchasePriceEok: number, ltvPercent = 70):
   return roundEok(purchasePriceEok * (ltvPercent / 100))
 }
 
+export function defaultLtvPercent(purchasePriceEok: number, loanAmountEok: number): number {
+  if (purchasePriceEok <= 0) return 0
+  return roundPercent((loanAmountEok / purchasePriceEok) * 100)
+}
+
 export function calculateInvestment(input: CalculatorInput): CalculatorResult {
   const sideCostsEok = roundEok(
     input.acquisitionTaxEok + input.legalFeeEok + input.brokerageFeeEok + input.otherCostEok,

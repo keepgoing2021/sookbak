@@ -7,6 +7,7 @@ import {
   defaultBrokerageFeeEok,
   defaultLegalFeeEok,
   defaultLoanAmountEok,
+  defaultLtvPercent,
   formatEok,
   formatManwon,
   formatPercent,
@@ -222,6 +223,26 @@ function DirectPurchaseCalculator({
     setValues((current) => ({ ...current, [key]: value }))
   }
 
+  const updateLtvPercent = (value: string) => {
+    setValues((current) => ({
+      ...current,
+      ltvPercent: value,
+      loanAmountEok: hasPurchasePrice && value.trim()
+        ? stringify(defaultLoanAmountEok(purchasePriceEok, toNumber(value)))
+        : '',
+    }))
+  }
+
+  const updateLoanAmount = (value: string) => {
+    setValues((current) => ({
+      ...current,
+      loanAmountEok: value,
+      ltvPercent: hasPurchasePrice && value.trim()
+        ? stringify(defaultLtvPercent(purchasePriceEok, toNumber(value)))
+        : '',
+    }))
+  }
+
   return (
     <>
       <header className="hero-copy">
@@ -315,16 +336,16 @@ function DirectPurchaseCalculator({
               label="LTV"
               unit="%"
               value={values.ltvPercent}
-              onChange={(value) => updateFree('ltvPercent', value)}
-              help="매매가 대비 대출 비율을 직접 조절하세요. 기본 70%."
+              onChange={updateLtvPercent}
+              help="매매가 대비 대출 비율이에요. LTV를 바꾸면 대출금액도 같이 바뀌어요."
               inputMode="decimal"
             />
             <MoneyInput
               label="대출금액"
               unit="억원"
               value={effective.loanAmountEok}
-              onChange={(value) => updateAuto('loanAmountEok', value)}
-              help={`매매가 × LTV ${values.ltvPercent || 0}% 자동 입력 (금액 직접 수정 가능)`}
+              onChange={updateLoanAmount}
+              help={`금액을 직접 바꾸면 LTV도 ${values.ltvPercent || 0}%로 자동 보정돼요.`}
             />
             <MoneyInput
               label="대출 금리 (연)"

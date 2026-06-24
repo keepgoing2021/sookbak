@@ -5,6 +5,7 @@ import {
   defaultBrokerageFeeEok,
   defaultLegalFeeEok,
   defaultLoanAmountEok,
+  defaultLtvPercent,
 } from './calculator'
 
 describe('direct purchase calculator', () => {
@@ -18,6 +19,12 @@ describe('direct purchase calculator', () => {
   it('auto-calculates default loan amount from a custom LTV percent', () => {
     expect(defaultLoanAmountEok(12, 60)).toBe(7.2)
     expect(defaultLoanAmountEok(12, 80)).toBe(9.6)
+  })
+
+  it('auto-calculates LTV percent from a manually edited loan amount', () => {
+    expect(defaultLtvPercent(12, 6)).toBe(50)
+    expect(defaultLtvPercent(12, 8.4)).toBe(70)
+    expect(defaultLtvPercent(0, 8.4)).toBe(0)
   })
 
   it('calculates leverage and no-loan ROI in manwon/eok units', () => {
