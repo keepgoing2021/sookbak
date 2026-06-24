@@ -47,7 +47,7 @@ type Values = {
   legalFeeEok: string | null
   brokerageFeeEok: string | null
   otherCostEok: string
-  loanAmountEok: string | null
+  loanAmountEok: string
   ltvPercent: string
   annualInterestRate: string
   tourismLoanAmountEok: string
@@ -55,7 +55,7 @@ type Values = {
   monthlyRevenueManwon: string
 }
 
-type AutoFieldKey = 'acquisitionTaxEok' | 'legalFeeEok' | 'brokerageFeeEok' | 'loanAmountEok'
+type AutoFieldKey = 'acquisitionTaxEok' | 'legalFeeEok' | 'brokerageFeeEok'
 type FreeFieldKey =
   | 'purchasePriceEok'
   | 'otherCostEok'
@@ -77,7 +77,7 @@ const initialValues: Values = {
   legalFeeEok: null,
   brokerageFeeEok: null,
   otherCostEok: '',
-  loanAmountEok: null,
+  loanAmountEok: '',
   ltvPercent: '70',
   annualInterestRate: '4.5',
   tourismLoanAmountEok: '',
@@ -167,22 +167,23 @@ function DirectPurchaseCalculator({
 
   const autoDefaults = useMemo(() => {
     if (!hasPurchasePrice) {
-      return { acquisitionTaxEok: '', legalFeeEok: '', brokerageFeeEok: '', loanAmountEok: '' }
+      return { acquisitionTaxEok: '', legalFeeEok: '', brokerageFeeEok: '' }
     }
     return {
       acquisitionTaxEok: stringify(defaultAcquisitionTaxEok(propertyType, purchasePriceEok)),
       legalFeeEok: stringify(defaultLegalFeeEok(purchasePriceEok)),
       brokerageFeeEok: stringify(defaultBrokerageFeeEok(purchasePriceEok)),
-      loanAmountEok: stringify(defaultLoanAmountEok(purchasePriceEok, ltvPercent)),
     }
-  }, [propertyType, purchasePriceEok, ltvPercent, hasPurchasePrice])
+  }, [propertyType, purchasePriceEok, hasPurchasePrice])
 
   const effective = {
     acquisitionTaxEok: values.acquisitionTaxEok ?? autoDefaults.acquisitionTaxEok,
     legalFeeEok: values.legalFeeEok ?? autoDefaults.legalFeeEok,
     brokerageFeeEok: values.brokerageFeeEok ?? autoDefaults.brokerageFeeEok,
-    loanAmountEok: values.loanAmountEok ?? autoDefaults.loanAmountEok,
   }
+
+  const effectiveLoanAmountEok = values.loanAmountEok ||
+    (hasPurchasePrice ? stringify(defaultLoanAmountEok(purchasePriceEok, ltvPercent)) : '')
 
   const input = useMemo(
     () => ({
@@ -192,7 +193,7 @@ function DirectPurchaseCalculator({
       legalFeeEok: toNumber(effective.legalFeeEok),
       brokerageFeeEok: toNumber(effective.brokerageFeeEok),
       otherCostEok: toNumber(values.otherCostEok),
-      loanAmountEok: toNumber(effective.loanAmountEok),
+      loanAmountEok: toNumber(effectiveLoanAmountEok),
       annualInterestRate: toNumber(values.annualInterestRate),
       tourismLoanAmountEok: toNumber(values.tourismLoanAmountEok),
       tourismLoanAnnualInterestRate: toNumber(values.tourismLoanAnnualInterestRate),
@@ -204,7 +205,7 @@ function DirectPurchaseCalculator({
       effective.acquisitionTaxEok,
       effective.legalFeeEok,
       effective.brokerageFeeEok,
-      effective.loanAmountEok,
+      effectiveLoanAmountEok,
       values.otherCostEok,
       values.annualInterestRate,
       values.tourismLoanAmountEok,
@@ -217,6 +218,17 @@ function DirectPurchaseCalculator({
 
   const updateFree = (key: FreeFieldKey, value: string) => {
     setValues((current) => ({ ...current, [key]: value }))
+  }
+
+  const updatePurchasePrice = (value: string) => {
+    const nextPurchasePriceEok = toNumber(value)
+    setValues((current) => ({
+      ...current,
+      purchasePriceEok: value,
+      loanAmountEok: nextPurchasePriceEok > 0 && current.ltvPercent.trim()
+        ? stringify(defaultLoanAmountEok(nextPurchasePriceEok, toNumber(current.ltvPercent)))
+        : '',
+    }))
   }
 
   const updateAuto = (key: AutoFieldKey, value: string) => {
@@ -283,7 +295,7 @@ function DirectPurchaseCalculator({
               placeholder="예: 12"
               unit="억원"
               value={values.purchasePriceEok}
-              onChange={(value) => updateFree('purchasePriceEok', value)}
+              onChange={updatePurchasePrice}
               help="먼저 계약가만 넣으면 나머지 비용은 자동으로 잡혀요."
             />
           </div>
@@ -343,7 +355,7 @@ function DirectPurchaseCalculator({
             <MoneyInput
               label="대출금액"
               unit="억원"
-              value={effective.loanAmountEok}
+              value={effectiveLoanAmountEok}
               onChange={updateLoanAmount}
               help={`금액을 직접 바꾸면 LTV도 ${values.ltvPercent || 0}%로 자동 보정돼요.`}
             />
