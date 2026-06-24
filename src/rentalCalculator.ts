@@ -39,7 +39,7 @@ export const DEFAULT_SCENARIO_FALLBACKS = {
   optimistic: { nightlyPriceManwon: 23, occupancyPercent: 75 },
 } as const
 
-export const DEFAULT_MANAGED_FEE_PERCENT = 20
+export const DEFAULT_MANAGED_FEE_PERCENT = 5
 export const DEFAULT_DIRECT_HOURS = 28
 export const DEFAULT_HOURLY_VALUE_MANWON = 2
 

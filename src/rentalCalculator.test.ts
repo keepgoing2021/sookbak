@@ -3,6 +3,7 @@ import {
   calculateRental,
   calculateScenario,
   compareManagedVsDirect,
+  DEFAULT_MANAGED_FEE_PERCENT,
   deriveScenarioDefaults,
   type RentalCalculatorInput,
 } from './rentalCalculator'
@@ -185,6 +186,10 @@ describe('calculateScenario', () => {
 })
 
 describe('managed vs direct comparison', () => {
+  it('uses 5 percent as the default managed operation fee', () => {
+    expect(DEFAULT_MANAGED_FEE_PERCENT).toBe(5)
+  })
+
   it('subtracts managed fee from direct net and divides by direct hours for hourly reward', () => {
     const result = compareManagedVsDirect({
       monthlyRevenueManwon: 360,

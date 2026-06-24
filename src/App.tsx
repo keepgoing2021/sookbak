@@ -866,7 +866,7 @@ function ManagedVsDirectSection({
             unit="%"
             value={managedFeePercent}
             onChange={setManagedFeePercent}
-            help="업계 평균 약 15–25%, 디폴트 20%"
+            help="위탁운영 참고 수수료율 5%를 기본값으로 잡았어요."
           />
           <MoneyInput
             label="직접운영 예상시간"
