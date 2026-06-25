@@ -22,6 +22,8 @@ export interface CalculatorResult {
   tourismLoanMonthlyInterestManwon: number
   totalMonthlyInterestManwon: number
   monthlyNetManwon: number
+  targetMonthlyNetManwon: number
+  targetMonthlyNetGapManwon: number
   annualNetManwon: number
   annualRevenueManwon: number
   roiWithLoanPercent: number | null
@@ -34,6 +36,8 @@ const TAX_RATES: Record<PropertyType, number> = {
   housing: 0.011,
   land: 0.046,
 }
+
+const TARGET_MONTHLY_NET_MANWON_PER_EOK = 300
 
 export function toNumber(value: string): number {
   const normalized = value.replace(/,/g, '').trim()
@@ -87,6 +91,8 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
     monthlyInterestManwon + tourismLoanMonthlyInterestManwon,
   )
   const monthlyNetManwon = roundManwon(input.monthlyRevenueManwon - totalMonthlyInterestManwon)
+  const targetMonthlyNetManwon = roundManwon(totalInvestmentEok * TARGET_MONTHLY_NET_MANWON_PER_EOK)
+  const targetMonthlyNetGapManwon = roundManwon(monthlyNetManwon - targetMonthlyNetManwon)
   const annualNetManwon = roundManwon(monthlyNetManwon * 12)
   const annualRevenueManwon = roundManwon(input.monthlyRevenueManwon * 12)
   const roiWithLoanPercent = cashInvestedWithLoanEok > 0
@@ -107,6 +113,8 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
     tourismLoanMonthlyInterestManwon,
     totalMonthlyInterestManwon,
     monthlyNetManwon,
+    targetMonthlyNetManwon,
+    targetMonthlyNetGapManwon,
     annualNetManwon,
     annualRevenueManwon,
     roiWithLoanPercent,

@@ -397,7 +397,7 @@ function DirectPurchaseCalculator({
       <aside className="notice">
         <strong>읽는 법</strong>
         <span>
-          ①번은 대출 이자까지 반영한 실제 운영 수익률, ②번은 비교용 무대출 기준이에요. 월 매출은 운영비·수수료를 미리 뺀 순매출로 입력해야 정확해요. 기타비용(권리금 등)은 회수 보장이 없는데도 자기자본에 묶이는 돈이라 수익률 숫자와 별개로 같이 보셔야 해요.
+          ①번은 대출 이자까지 반영한 실제 운영 수익률, ②번은 비교용 무대출 기준이에요. 목표 월순수익은 총투입금 10억당 월 순수익 3,000만원 기준으로 계산해요. 월 매출은 운영비·수수료를 미리 뺀 순매출로 입력해야 정확해요. 기타비용(권리금 등)은 회수 보장이 없는데도 자기자본에 묶이는 돈이라 수익률 숫자와 별개로 같이 보셔야 해요.
         </span>
       </aside>
     </>
@@ -1259,6 +1259,8 @@ function DirectResultPanel({
         <Metric label="관광기금 월이자" value={formatManwon(result.tourismLoanMonthlyInterestManwon)} />
         <Metric label="총 월이자" value={formatManwon(result.totalMonthlyInterestManwon)} />
         <Metric label="월 순수익" value={formatManwon(result.monthlyNetManwon)} highlight />
+        <Metric label="목표 월순수익" value={formatManwon(result.targetMonthlyNetManwon)} />
+        <Metric label="목표 대비" value={formatManwonSigned(result.targetMonthlyNetGapManwon)} />
       </div>
 
       <div className="scenario-grid">

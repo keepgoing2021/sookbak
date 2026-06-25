@@ -49,6 +49,8 @@ describe('direct purchase calculator', () => {
     expect(result.tourismLoanMonthlyInterestManwon).toBe(0)
     expect(result.totalMonthlyInterestManwon).toBe(315)
     expect(result.monthlyNetManwon).toBe(285)
+    expect(result.targetMonthlyNetManwon).toBe(3803)
+    expect(result.targetMonthlyNetGapManwon).toBe(-3518)
     expect(result.annualNetManwon).toBe(3420)
     expect(result.annualRevenueManwon).toBe(7200)
     expect(result.roiWithLoanPercent).toBe(7.99)
@@ -91,6 +93,8 @@ describe('direct purchase calculator', () => {
     })
 
     expect(result.totalInvestmentEok).toBe(0)
+    expect(result.targetMonthlyNetManwon).toBe(0)
+    expect(result.targetMonthlyNetGapManwon).toBe(0)
     expect(result.roiWithLoanPercent).toBeNull()
     expect(result.monthlyNoLoanYieldPercent).toBeNull()
     expect(result.roiNoLoanPercent).toBeNull()
