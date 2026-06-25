@@ -28,6 +28,9 @@ export interface CalculatorResult {
   annualRevenueManwon: number
   roiWithLoanPercent: number | null
   monthlyCashYieldPercent: number | null
+  exitBuyerRequiredCashEok: number | null
+  exitEstimatedSalePriceEok: number | null
+  exitSalePriceGapEok: number | null
   roiNoLoanPercent: number | null
 }
 
@@ -40,6 +43,8 @@ const TAX_RATES: Record<PropertyType, number> = {
 export const DEFAULT_LTV_PERCENT = 80
 export const DEFAULT_ANNUAL_INTEREST_RATE = 5
 export const DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE = 2.1
+export const DEFAULT_EXIT_BUYER_LTV_PERCENT = 80
+export const DEFAULT_EXIT_MONTHLY_YIELD_PERCENT = 3
 
 const TARGET_MONTHLY_NET_MANWON_PER_EOK = 300
 
@@ -110,6 +115,15 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
   const monthlyCashYieldPercent = cashInvestedWithLoanEok > 0
     ? roundPercent((monthlyNetManwon / (cashInvestedWithLoanEok * 10000)) * 100)
     : null
+  const exitBuyerRequiredCashEok = monthlyNetManwon > 0
+    ? roundEok(monthlyNetManwon / (DEFAULT_EXIT_MONTHLY_YIELD_PERCENT * 100))
+    : null
+  const exitEstimatedSalePriceEok = exitBuyerRequiredCashEok !== null
+    ? roundEok(exitBuyerRequiredCashEok / (1 - DEFAULT_EXIT_BUYER_LTV_PERCENT / 100))
+    : null
+  const exitSalePriceGapEok = exitEstimatedSalePriceEok !== null
+    ? roundEok(exitEstimatedSalePriceEok - input.purchasePriceEok)
+    : null
   const roiNoLoanPercent = totalInvestmentEok > 0
     ? roundPercent((annualRevenueManwon / (totalInvestmentEok * 10000)) * 100)
     : null
@@ -128,6 +142,9 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
     annualRevenueManwon,
     roiWithLoanPercent,
     monthlyCashYieldPercent,
+    exitBuyerRequiredCashEok,
+    exitEstimatedSalePriceEok,
+    exitSalePriceGapEok,
     roiNoLoanPercent,
   }
 }

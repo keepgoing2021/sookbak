@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   calculateInvestment,
   DEFAULT_ANNUAL_INTEREST_RATE,
+  DEFAULT_EXIT_BUYER_LTV_PERCENT,
+  DEFAULT_EXIT_MONTHLY_YIELD_PERCENT,
   DEFAULT_LTV_PERCENT,
   DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE,
   defaultAcquisitionTaxEok,
@@ -64,7 +66,34 @@ describe('direct purchase calculator', () => {
     expect(result.annualRevenueManwon).toBe(7200)
     expect(result.roiWithLoanPercent).toBe(7.99)
     expect(result.monthlyCashYieldPercent).toBe(0.67)
+    expect(result.exitBuyerRequiredCashEok).toBe(0.95)
+    expect(result.exitEstimatedSalePriceEok).toBe(4.75)
+    expect(result.exitSalePriceGapEok).toBe(-7.25)
     expect(result.roiNoLoanPercent).toBe(5.68)
+  })
+
+  it('estimates exit sale price from monthly net, buyer 80% LTV, and 3% monthly yield', () => {
+    expect(DEFAULT_EXIT_BUYER_LTV_PERCENT).toBe(80)
+    expect(DEFAULT_EXIT_MONTHLY_YIELD_PERCENT).toBe(3)
+
+    const result = calculateInvestment({
+      propertyType: 'commercial',
+      purchasePriceEok: 40,
+      acquisitionTaxEok: 1.84,
+      legalFeeEok: 0.06,
+      brokerageFeeEok: 0.36,
+      otherCostEok: 0,
+      loanAmountEok: 32,
+      annualInterestRate: 5,
+      tourismLoanAmountEok: 0,
+      tourismLoanAnnualInterestRate: 2.1,
+      monthlyRevenueManwon: 5833,
+    })
+
+    expect(result.monthlyNetManwon).toBe(4500)
+    expect(result.exitBuyerRequiredCashEok).toBe(15)
+    expect(result.exitEstimatedSalePriceEok).toBe(75)
+    expect(result.exitSalePriceGapEok).toBe(35)
   })
 
   it('includes tourism fund construction loan interest in total monthly interest', () => {
@@ -126,6 +155,9 @@ describe('direct purchase calculator', () => {
     expect(result.targetMonthlyNetGapManwon).toBe(0)
     expect(result.roiWithLoanPercent).toBeNull()
     expect(result.monthlyCashYieldPercent).toBeNull()
+    expect(result.exitBuyerRequiredCashEok).toBeNull()
+    expect(result.exitEstimatedSalePriceEok).toBeNull()
+    expect(result.exitSalePriceGapEok).toBeNull()
     expect(result.roiNoLoanPercent).toBeNull()
   })
 

@@ -3,6 +3,8 @@ import './App.css'
 import {
   type PropertyType,
   DEFAULT_ANNUAL_INTEREST_RATE,
+  DEFAULT_EXIT_BUYER_LTV_PERCENT,
+  DEFAULT_EXIT_MONTHLY_YIELD_PERCENT,
   DEFAULT_LTV_PERCENT,
   DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE,
   calculateInvestment,
@@ -270,75 +272,79 @@ function DirectPurchaseCalculator({
       </header>
 
       <div className="form-grid">
-        <section className="panel investment-panel" aria-labelledby="investment-title">
-          <div className="panel-heading">
-            <span className="section-index">01</span>
-            <h2 id="investment-title">투자 비용 입력</h2>
-          </div>
+        <section className="left-column">
+          <div className="panel investment-panel" aria-labelledby="investment-title">
+            <div className="panel-heading">
+              <span className="section-index">01</span>
+              <h2 id="investment-title">투자 비용 입력</h2>
+            </div>
 
-          <label className="field-label">매물 종류</label>
-          <div className="segmented" role="tablist" aria-label="매물 종류 선택">
-            {propertyTypes.map((item) => (
-              <button
-                key={item.key}
-                type="button"
-                className={propertyType === item.key ? 'active' : ''}
-                onClick={() => setPropertyType(item.key)}
-                aria-selected={propertyType === item.key}
-              >
-                <span>{item.label}</span>
-                <small>{item.description}</small>
-              </button>
-            ))}
-          </div>
+            <label className="field-label">매물 종류</label>
+            <div className="segmented" role="tablist" aria-label="매물 종류 선택">
+              {propertyTypes.map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  className={propertyType === item.key ? 'active' : ''}
+                  onClick={() => setPropertyType(item.key)}
+                  aria-selected={propertyType === item.key}
+                >
+                  <span>{item.label}</span>
+                  <small>{item.description}</small>
+                </button>
+              ))}
+            </div>
 
-          <div className="primary-input-block">
-            <MoneyInput
-              label="매매가"
-              placeholder="예: 12"
-              unit="억원"
-              value={values.purchasePriceEok}
-              onChange={updatePurchasePrice}
-              help="먼저 계약가만 넣으면 나머지 비용은 자동으로 잡혀요."
-            />
-          </div>
-
-          <details className="details-card" open={hasPurchasePrice}>
-            <summary>
-              <span>상세 비용 수정</span>
-              <small>자동 계산값 확인·수정</small>
-            </summary>
-            <div className="details-body">
+            <div className="primary-input-block">
               <MoneyInput
-                label="취득세"
+                label="매매가"
+                placeholder="예: 12"
                 unit="억원"
-                value={effective.acquisitionTaxEok}
-                onChange={(value) => updateAuto('acquisitionTaxEok', value)}
-                help="매매가 × 세율 자동 입력"
-              />
-              <MoneyInput
-                label="법무사 비용"
-                unit="억원"
-                value={effective.legalFeeEok}
-                onChange={(value) => updateAuto('legalFeeEok', value)}
-                help="3억미만 0.3% / 3~10억 0.2% / 10억+ 0.15%"
-              />
-              <MoneyInput
-                label="중개수수료"
-                unit="억원"
-                value={effective.brokerageFeeEok}
-                onChange={(value) => updateAuto('brokerageFeeEok', value)}
-                help="매매가 × 0.9% 자동 입력"
-              />
-              <MoneyInput
-                label="기타비용 (권리금 등)"
-                unit="억원"
-                value={values.otherCostEok}
-                onChange={(value) => updateFree('otherCostEok', value)}
-                help="회수 보장 안 되는 자금은 별도로 보수적으로 잡으세요."
+                value={values.purchasePriceEok}
+                onChange={updatePurchasePrice}
+                help="먼저 계약가만 넣으면 나머지 비용은 자동으로 잡혀요."
               />
             </div>
-          </details>
+
+            <details className="details-card" open={hasPurchasePrice}>
+              <summary>
+                <span>상세 비용 수정</span>
+                <small>자동 계산값 확인·수정</small>
+              </summary>
+              <div className="details-body">
+                <MoneyInput
+                  label="취득세"
+                  unit="억원"
+                  value={effective.acquisitionTaxEok}
+                  onChange={(value) => updateAuto('acquisitionTaxEok', value)}
+                  help="매매가 × 세율 자동 입력"
+                />
+                <MoneyInput
+                  label="법무사 비용"
+                  unit="억원"
+                  value={effective.legalFeeEok}
+                  onChange={(value) => updateAuto('legalFeeEok', value)}
+                  help="3억미만 0.3% / 3~10억 0.2% / 10억+ 0.15%"
+                />
+                <MoneyInput
+                  label="중개수수료"
+                  unit="억원"
+                  value={effective.brokerageFeeEok}
+                  onChange={(value) => updateAuto('brokerageFeeEok', value)}
+                  help="매매가 × 0.9% 자동 입력"
+                />
+                <MoneyInput
+                  label="기타비용 (권리금 등)"
+                  unit="억원"
+                  value={values.otherCostEok}
+                  onChange={(value) => updateFree('otherCostEok', value)}
+                  help="회수 보장 안 되는 자금은 별도로 보수적으로 잡으세요."
+                />
+              </div>
+            </details>
+          </div>
+
+          <ExitEstimatePanel hasPurchasePrice={hasPurchasePrice} result={result} />
         </section>
 
         <section className="right-column">
@@ -404,6 +410,58 @@ function DirectPurchaseCalculator({
         </span>
       </aside>
     </>
+  )
+}
+
+function ExitEstimatePanel({
+  hasPurchasePrice,
+  result,
+}: {
+  hasPurchasePrice: boolean
+  result: ReturnType<typeof calculateInvestment>
+}) {
+  const estimatedSalePrice = result.exitEstimatedSalePriceEok === null
+    ? '-'
+    : formatEok(result.exitEstimatedSalePriceEok)
+  const requiredCash = result.exitBuyerRequiredCashEok === null
+    ? '-'
+    : formatEok(result.exitBuyerRequiredCashEok)
+  const priceGap = result.exitSalePriceGapEok === null
+    ? '-'
+    : formatEokSigned(result.exitSalePriceGapEok)
+
+  return (
+    <section className="panel exit-panel" aria-labelledby="exit-title">
+      <div className="panel-heading green">
+        <span className="section-index">03</span>
+        <h2 id="exit-title">엑싯 매도가 역산</h2>
+      </div>
+
+      <p className="exit-panel-copy">
+        미래 매수자가 LTV {DEFAULT_EXIT_BUYER_LTV_PERCENT}%를 일으키고, 실투입 에쿼티 기준 월 수익률 {DEFAULT_EXIT_MONTHLY_YIELD_PERCENT}%를 요구한다고 가정해요.
+      </p>
+
+      <div className="exit-highlight">
+        <span>예상 엑싯 매도가</span>
+        <strong>{hasPurchasePrice ? estimatedSalePrice : '-'}</strong>
+        <p>월 순수익 ÷ {DEFAULT_EXIT_MONTHLY_YIELD_PERCENT}% ÷ 자기자본 {100 - DEFAULT_EXIT_BUYER_LTV_PERCENT}%</p>
+      </div>
+
+      <dl className="exit-metrics">
+        <div>
+          <dt>매수자 필요 에쿼티</dt>
+          <dd>{hasPurchasePrice ? requiredCash : '-'}</dd>
+        </div>
+        <div>
+          <dt>현재 매매가 대비</dt>
+          <dd>{hasPurchasePrice ? priceGap : '-'}</dd>
+        </div>
+      </dl>
+
+      <p className="exit-caveat">
+        예: 월 순수익 4,500만원이면 필요 에쿼티 15억, LTV 80% 기준 매수 가능가는 75억으로 봅니다.
+      </p>
+    </section>
   )
 }
 
@@ -1388,6 +1446,12 @@ function Metric({ label, value, highlight = false }: { label: string; value: str
 function stringify(value: number): string {
   if (!value) return ''
   return String(value)
+}
+
+function formatEokSigned(value: number): string {
+  if (value > 0) return `+${formatEok(value)}`
+  if (value < 0) return `-${formatEok(Math.abs(value))}`
+  return formatEok(0)
 }
 
 export default App
