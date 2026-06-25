@@ -25,6 +25,7 @@ export interface CalculatorResult {
   annualNetManwon: number
   annualRevenueManwon: number
   roiWithLoanPercent: number | null
+  monthlyNoLoanYieldPercent: number | null
   roiNoLoanPercent: number | null
 }
 
@@ -91,6 +92,9 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
   const roiWithLoanPercent = cashInvestedWithLoanEok > 0
     ? roundPercent((annualNetManwon / (cashInvestedWithLoanEok * 10000)) * 100)
     : null
+  const monthlyNoLoanYieldPercent = totalInvestmentEok > 0
+    ? roundPercent((input.monthlyRevenueManwon / (totalInvestmentEok * 10000)) * 100)
+    : null
   const roiNoLoanPercent = totalInvestmentEok > 0
     ? roundPercent((annualRevenueManwon / (totalInvestmentEok * 10000)) * 100)
     : null
@@ -106,6 +110,7 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
     annualNetManwon,
     annualRevenueManwon,
     roiWithLoanPercent,
+    monthlyNoLoanYieldPercent,
     roiNoLoanPercent,
   }
 }

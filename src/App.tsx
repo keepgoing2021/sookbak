@@ -1288,6 +1288,10 @@ function DirectResultPanel({
               <dd>{formatEok(result.totalInvestmentEok)}</dd>
             </div>
             <div>
+              <dt>월 수익률</dt>
+              <dd>{formatPercent(result.monthlyNoLoanYieldPercent)}</dd>
+            </div>
+            <div>
               <dt>연 순매출</dt>
               <dd>{formatManwon(result.annualRevenueManwon)}</dd>
             </div>
