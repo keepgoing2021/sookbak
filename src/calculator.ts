@@ -91,7 +91,9 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
     monthlyInterestManwon + tourismLoanMonthlyInterestManwon,
   )
   const monthlyNetManwon = roundManwon(input.monthlyRevenueManwon - totalMonthlyInterestManwon)
-  const targetMonthlyNetManwon = roundManwon(totalInvestmentEok * TARGET_MONTHLY_NET_MANWON_PER_EOK)
+  const targetMonthlyNetManwon = roundManwon(
+    cashInvestedWithLoanEok * TARGET_MONTHLY_NET_MANWON_PER_EOK,
+  )
   const targetMonthlyNetGapManwon = roundManwon(monthlyNetManwon - targetMonthlyNetManwon)
   const annualNetManwon = roundManwon(monthlyNetManwon * 12)
   const annualRevenueManwon = roundManwon(input.monthlyRevenueManwon * 12)

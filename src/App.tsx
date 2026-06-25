@@ -397,7 +397,7 @@ function DirectPurchaseCalculator({
       <aside className="notice">
         <strong>읽는 법</strong>
         <span>
-          ①번은 대출 이자까지 반영한 실제 운영 수익률, ②번은 비교용 무대출 기준이에요. 목표 월순수익은 총투입금 10억당 월 순수익 3,000만원 기준으로 계산해요. 월 매출은 운영비·수수료를 미리 뺀 순매출로 입력해야 정확해요. 기타비용(권리금 등)은 회수 보장이 없는데도 자기자본에 묶이는 돈이라 수익률 숫자와 별개로 같이 보셔야 해요.
+          ①번은 대출 이자까지 반영한 실제 운영 수익률, ②번은 비교용 무대출 기준이에요. 목표 월순수익은 대출을 뺀 실투입금 10억당 월 순수익 3,000만원 기준으로 계산해요. 괄호 안 총투입금은 대출 포함 전체 자금 규모예요. 월 매출은 운영비·수수료를 미리 뺀 순매출로 입력해야 정확해요.
         </span>
       </aside>
     </>
@@ -1086,7 +1086,10 @@ function ConstructionRiskSection({
           <>
             <LinkedMetric label="매물 종류" value={propertyTypes.find((item) => item.key === directPropertyType)?.label ?? '-'} />
             <LinkedMetric label="매매가" value={directPurchasePrice > 0 ? formatEok(directPurchasePrice) : '미입력'} />
-            <LinkedMetric label="총투입금" value={directPurchasePrice > 0 ? formatEok(directResult.totalInvestmentEok) : '미입력'} />
+            <LinkedMetric
+              label="실투입금"
+              value={directPurchasePrice > 0 ? `${formatEok(directResult.cashInvestedWithLoanEok)} (총 ${formatEok(directResult.totalInvestmentEok)})` : '미입력'}
+            />
             <LinkedMetric label="월 순수익" value={directPurchasePrice > 0 ? formatManwon(directResult.monthlyNetManwon) : '미입력'} />
           </>
         ) : (
@@ -1254,7 +1257,10 @@ function DirectResultPanel({
     <section className="result-panel" aria-live="polite">
       <div className="result-summary">
         <Metric label="부대비용 합계" value={formatEok(result.sideCostsEok)} />
-        <Metric label="총투입금" value={formatEok(result.totalInvestmentEok)} />
+        <Metric
+          label="실투입금"
+          value={`${formatEok(result.cashInvestedWithLoanEok)} (총 ${formatEok(result.totalInvestmentEok)})`}
+        />
         <Metric label="담보대출 월이자" value={formatManwon(result.monthlyInterestManwon)} />
         <Metric label="관광기금 월이자" value={formatManwon(result.tourismLoanMonthlyInterestManwon)} />
         <Metric label="총 월이자" value={formatManwon(result.totalMonthlyInterestManwon)} />

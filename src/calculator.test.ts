@@ -49,8 +49,8 @@ describe('direct purchase calculator', () => {
     expect(result.tourismLoanMonthlyInterestManwon).toBe(0)
     expect(result.totalMonthlyInterestManwon).toBe(315)
     expect(result.monthlyNetManwon).toBe(285)
-    expect(result.targetMonthlyNetManwon).toBe(3803)
-    expect(result.targetMonthlyNetGapManwon).toBe(-3518)
+    expect(result.targetMonthlyNetManwon).toBe(1283)
+    expect(result.targetMonthlyNetGapManwon).toBe(-998)
     expect(result.annualNetManwon).toBe(3420)
     expect(result.annualRevenueManwon).toBe(7200)
     expect(result.roiWithLoanPercent).toBe(7.99)
@@ -77,6 +77,26 @@ describe('direct purchase calculator', () => {
     expect(result.tourismLoanMonthlyInterestManwon).toBe(33)
     expect(result.totalMonthlyInterestManwon).toBe(348)
     expect(result.monthlyNetManwon).toBe(252)
+  })
+
+  it('uses cash invested after LTV loan as the monthly net target base', () => {
+    const result = calculateInvestment({
+      propertyType: 'commercial',
+      purchasePriceEok: 40,
+      acquisitionTaxEok: 1.84,
+      legalFeeEok: 0.06,
+      brokerageFeeEok: 0.36,
+      otherCostEok: 0,
+      loanAmountEok: 32,
+      annualInterestRate: 4.5,
+      tourismLoanAmountEok: 0,
+      tourismLoanAnnualInterestRate: 0,
+      monthlyRevenueManwon: 5000,
+    })
+
+    expect(result.totalInvestmentEok).toBe(42.26)
+    expect(result.cashInvestedWithLoanEok).toBe(10.26)
+    expect(result.targetMonthlyNetManwon).toBe(3078)
   })
 
   it('returns null ROI when there is no purchase price input', () => {
