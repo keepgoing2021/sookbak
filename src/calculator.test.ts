@@ -54,7 +54,7 @@ describe('direct purchase calculator', () => {
     expect(result.annualNetManwon).toBe(3420)
     expect(result.annualRevenueManwon).toBe(7200)
     expect(result.roiWithLoanPercent).toBe(7.99)
-    expect(result.monthlyNoLoanYieldPercent).toBe(0.47)
+    expect(result.monthlyCashYieldPercent).toBe(0.67)
     expect(result.roiNoLoanPercent).toBe(5.68)
   })
 
@@ -116,7 +116,7 @@ describe('direct purchase calculator', () => {
     expect(result.targetMonthlyNetManwon).toBe(0)
     expect(result.targetMonthlyNetGapManwon).toBe(0)
     expect(result.roiWithLoanPercent).toBeNull()
-    expect(result.monthlyNoLoanYieldPercent).toBeNull()
+    expect(result.monthlyCashYieldPercent).toBeNull()
     expect(result.roiNoLoanPercent).toBeNull()
   })
 

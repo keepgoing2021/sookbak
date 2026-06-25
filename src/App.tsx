@@ -397,7 +397,7 @@ function DirectPurchaseCalculator({
       <aside className="notice">
         <strong>읽는 법</strong>
         <span>
-          ①번은 대출 이자까지 반영한 실제 운영 수익률, ②번은 비교용 무대출 기준이에요. 목표 월순수익은 대출을 뺀 실투입금 10억당 월 순수익 3,000만원 기준으로 계산해요. 괄호 안 총투입금은 대출 포함 전체 자금 규모예요. 월 매출은 운영비·수수료를 미리 뺀 순매출로 입력해야 정확해요.
+          ①번은 대출 이자까지 반영한 실제 운영 수익률이에요. 월 수익률과 목표 월순수익은 모두 대출을 뺀 실투입금 기준으로 계산해요. ②번은 비교용 무대출 기준이고, 괄호 안 총투입금은 대출 포함 전체 자금 규모예요. 월 매출은 운영비·수수료를 미리 뺀 순매출로 입력해야 정확해요.
         </span>
       </aside>
     </>
@@ -1280,6 +1280,10 @@ function DirectResultPanel({
               <dd>{formatEok(result.cashInvestedWithLoanEok)}</dd>
             </div>
             <div>
+              <dt>월 수익률</dt>
+              <dd>{formatPercent(result.monthlyCashYieldPercent)}</dd>
+            </div>
+            <div>
               <dt>연 순수익</dt>
               <dd>{formatManwon(result.annualNetManwon)}</dd>
             </div>
@@ -1295,10 +1299,7 @@ function DirectResultPanel({
               <dt>투입금</dt>
               <dd>{formatEok(result.totalInvestmentEok)}</dd>
             </div>
-            <div>
-              <dt>월 수익률</dt>
-              <dd>{formatPercent(result.monthlyNoLoanYieldPercent)}</dd>
-            </div>
+
             <div>
               <dt>연 순매출</dt>
               <dd>{formatManwon(result.annualRevenueManwon)}</dd>
