@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
   calculateInvestment,
+  DEFAULT_ANNUAL_INTEREST_RATE,
+  DEFAULT_LTV_PERCENT,
+  DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE,
   defaultAcquisitionTaxEok,
   defaultBrokerageFeeEok,
   defaultLegalFeeEok,
@@ -9,11 +12,17 @@ import {
 } from './calculator'
 
 describe('direct purchase calculator', () => {
+  it('uses the requested editable default financing assumptions', () => {
+    expect(DEFAULT_LTV_PERCENT).toBe(80)
+    expect(DEFAULT_ANNUAL_INTEREST_RATE).toBe(5)
+    expect(DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE).toBe(2.1)
+  })
+
   it('auto-calculates default fees from purchase price', () => {
     expect(defaultAcquisitionTaxEok('commercial', 12)).toBe(0.552)
     expect(defaultLegalFeeEok(12)).toBe(0.018)
     expect(defaultBrokerageFeeEok(12)).toBe(0.108)
-    expect(defaultLoanAmountEok(12)).toBe(8.4)
+    expect(defaultLoanAmountEok(12)).toBe(9.6)
   })
 
   it('auto-calculates default loan amount from a custom LTV percent', () => {

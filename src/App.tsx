@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from
 import './App.css'
 import {
   type PropertyType,
+  DEFAULT_ANNUAL_INTEREST_RATE,
+  DEFAULT_LTV_PERCENT,
+  DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE,
   calculateInvestment,
   defaultAcquisitionTaxEok,
   defaultBrokerageFeeEok,
@@ -78,10 +81,10 @@ const initialValues: Values = {
   brokerageFeeEok: null,
   otherCostEok: '',
   loanAmountEok: '',
-  ltvPercent: '70',
-  annualInterestRate: '4.5',
+  ltvPercent: String(DEFAULT_LTV_PERCENT),
+  annualInterestRate: String(DEFAULT_ANNUAL_INTEREST_RATE),
   tourismLoanAmountEok: '',
-  tourismLoanAnnualInterestRate: '2.0',
+  tourismLoanAnnualInterestRate: String(DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE),
   monthlyRevenueManwon: '',
 }
 

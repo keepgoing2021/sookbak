@@ -37,6 +37,10 @@ const TAX_RATES: Record<PropertyType, number> = {
   land: 0.046,
 }
 
+export const DEFAULT_LTV_PERCENT = 80
+export const DEFAULT_ANNUAL_INTEREST_RATE = 5
+export const DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE = 2.1
+
 const TARGET_MONTHLY_NET_MANWON_PER_EOK = 300
 
 export function toNumber(value: string): number {
@@ -63,7 +67,10 @@ export function defaultBrokerageFeeEok(purchasePriceEok: number): number {
   return roundEok(purchasePriceEok * 0.009)
 }
 
-export function defaultLoanAmountEok(purchasePriceEok: number, ltvPercent = 70): number {
+export function defaultLoanAmountEok(
+  purchasePriceEok: number,
+  ltvPercent = DEFAULT_LTV_PERCENT,
+): number {
   return roundEok(purchasePriceEok * (ltvPercent / 100))
 }
 
