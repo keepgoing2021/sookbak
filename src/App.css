@@ -422,6 +422,90 @@ h1 {
   color: #ff5b00;
 }
 
+.loan-resilience {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  margin: 0 0 14px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid #d8e2ef;
+  background: #ffffff;
+}
+
+.loan-resilience span {
+  display: block;
+  color: #6b7a90;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.loan-resilience strong {
+  display: block;
+  margin-top: 5px;
+  color: #172033;
+  font-size: 24px;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.loan-resilience p {
+  margin-top: 5px;
+  color: #5f6c82;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.loan-resilience small {
+  flex: 0 0 190px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.35;
+  text-align: right;
+}
+
+.loan-resilience-stable {
+  border-color: #a7f3d0;
+  background: linear-gradient(180deg, #ecfdf5, #ffffff);
+}
+
+.loan-resilience-stable strong {
+  color: #047857;
+}
+
+.loan-resilience-caution {
+  border-color: #fde68a;
+  background: linear-gradient(180deg, #fffbeb, #ffffff);
+}
+
+.loan-resilience-caution strong {
+  color: #b45309;
+}
+
+.loan-resilience-danger,
+.loan-resilience-deficit {
+  border-color: #fecaca;
+  background: linear-gradient(180deg, #fef2f2, #ffffff);
+}
+
+.loan-resilience-danger strong,
+.loan-resilience-deficit strong {
+  color: #dc2626;
+}
+
+.loan-resilience-no-loan {
+  border-color: #bfdbfe;
+  background: linear-gradient(180deg, #eff6ff, #ffffff);
+}
+
+.loan-resilience-no-loan strong {
+  color: #2563eb;
+}
+
 .scenario-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

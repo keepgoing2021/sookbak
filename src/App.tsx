@@ -1330,6 +1330,8 @@ function DirectResultPanel({
         <Metric label="목표 대비" value={formatManwonSigned(result.targetMonthlyNetGapManwon)} />
       </div>
 
+      <LoanResilienceCard result={result} />
+
       <div className="scenario-grid">
         <article className="scenario leverage">
           <span>① 대출 시나리오</span>
@@ -1369,6 +1371,25 @@ function DirectResultPanel({
         </article>
       </div>
     </section>
+  )
+}
+
+function LoanResilienceCard({ result }: { result: ReturnType<typeof calculateInvestment> }) {
+  return (
+    <article className={`loan-resilience loan-resilience-${result.loanResilienceStatus}`}>
+      <div>
+        <span>대출 버팀력</span>
+        <strong>
+          {formatLoanResilienceRatio(result.loanResilienceRatio)} · {result.loanResilienceLabel}
+        </strong>
+        <p>{result.loanResilienceMessage}</p>
+      </div>
+      <small>
+        {result.loanResilienceRatio === null
+          ? '월이자가 없어서 버팀력 계산을 생략했어요.'
+          : `월 순수익이 월이자의 ${formatLoanResilienceRatio(result.loanResilienceRatio)}예요.`}
+      </small>
+    </article>
   )
 }
 
@@ -1452,6 +1473,14 @@ function formatEokSigned(value: number): string {
   if (value > 0) return `+${formatEok(value)}`
   if (value < 0) return `-${formatEok(Math.abs(value))}`
   return formatEok(0)
+}
+
+function formatLoanResilienceRatio(value: number | null): string {
+  if (value === null) return '-'
+  return `${new Intl.NumberFormat('ko-KR', {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: value % 1 === 0 ? 0 : 1,
+  }).format(value)}배`
 }
 
 export default App

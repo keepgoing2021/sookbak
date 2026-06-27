@@ -60,6 +60,10 @@ describe('direct purchase calculator', () => {
     expect(result.tourismLoanMonthlyInterestManwon).toBe(0)
     expect(result.totalMonthlyInterestManwon).toBe(315)
     expect(result.monthlyNetManwon).toBe(285)
+    expect(result.loanResilienceRatio).toBe(0.9)
+    expect(result.loanResilienceStatus).toBe('deficit')
+    expect(result.loanResilienceLabel).toBe('적자')
+    expect(result.loanResilienceMessage).toBe('현재 수익으로는 이자 부담을 감당하기 어려워요.')
     expect(result.targetMonthlyNetManwon).toBe(1283)
     expect(result.targetMonthlyNetGapManwon).toBe(-998)
     expect(result.annualNetManwon).toBe(3420)
@@ -94,6 +98,29 @@ describe('direct purchase calculator', () => {
     expect(result.exitBuyerRequiredCashEok).toBe(15)
     expect(result.exitEstimatedSalePriceEok).toBe(75)
     expect(result.exitSalePriceGapEok).toBe(35)
+  })
+
+  it('shows plain-language loan resilience from monthly net versus interest', () => {
+    const result = calculateInvestment({
+      propertyType: 'commercial',
+      purchasePriceEok: 40,
+      acquisitionTaxEok: 1.84,
+      legalFeeEok: 0.06,
+      brokerageFeeEok: 0.36,
+      otherCostEok: 0,
+      loanAmountEok: 32,
+      annualInterestRate: 5,
+      tourismLoanAmountEok: 0,
+      tourismLoanAnnualInterestRate: 2.1,
+      monthlyRevenueManwon: 5833,
+    })
+
+    expect(result.totalMonthlyInterestManwon).toBe(1333)
+    expect(result.monthlyNetManwon).toBe(4500)
+    expect(result.loanResilienceRatio).toBe(3.38)
+    expect(result.loanResilienceStatus).toBe('stable')
+    expect(result.loanResilienceLabel).toBe('안정')
+    expect(result.loanResilienceMessage).toBe('이자 부담을 충분히 감당하는 편이에요.')
   })
 
   it('includes tourism fund construction loan interest in total monthly interest', () => {
@@ -155,6 +182,9 @@ describe('direct purchase calculator', () => {
     expect(result.targetMonthlyNetGapManwon).toBe(0)
     expect(result.roiWithLoanPercent).toBeNull()
     expect(result.monthlyCashYieldPercent).toBeNull()
+    expect(result.loanResilienceRatio).toBeNull()
+    expect(result.loanResilienceStatus).toBe('no-loan')
+    expect(result.loanResilienceLabel).toBe('대출 없음')
     expect(result.exitBuyerRequiredCashEok).toBeNull()
     expect(result.exitEstimatedSalePriceEok).toBeNull()
     expect(result.exitSalePriceGapEok).toBeNull()
@@ -176,6 +206,9 @@ describe('direct purchase calculator', () => {
 
     expect(result.monthlyInterestManwon).toBe(0)
     expect(result.monthlyNetManwon).toBe(500)
+    expect(result.loanResilienceRatio).toBeNull()
+    expect(result.loanResilienceStatus).toBe('no-loan')
+    expect(result.loanResilienceLabel).toBe('대출 없음')
     expect(result.roiWithLoanPercent).toBe(result.roiNoLoanPercent)
   })
 })

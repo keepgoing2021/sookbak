@@ -1,4 +1,5 @@
 export type PropertyType = 'commercial' | 'housing' | 'land'
+export type LoanResilienceStatus = 'stable' | 'caution' | 'danger' | 'deficit' | 'no-loan'
 
 export interface CalculatorInput {
   propertyType: PropertyType
@@ -28,6 +29,10 @@ export interface CalculatorResult {
   annualRevenueManwon: number
   roiWithLoanPercent: number | null
   monthlyCashYieldPercent: number | null
+  loanResilienceRatio: number | null
+  loanResilienceStatus: LoanResilienceStatus
+  loanResilienceLabel: string
+  loanResilienceMessage: string
   exitBuyerRequiredCashEok: number | null
   exitEstimatedSalePriceEok: number | null
   exitSalePriceGapEok: number | null
@@ -115,6 +120,7 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
   const monthlyCashYieldPercent = cashInvestedWithLoanEok > 0
     ? roundPercent((monthlyNetManwon / (cashInvestedWithLoanEok * 10000)) * 100)
     : null
+  const loanResilience = calculateLoanResilience(monthlyNetManwon, totalMonthlyInterestManwon)
   const exitBuyerRequiredCashEok = monthlyNetManwon > 0
     ? roundEok(monthlyNetManwon / (DEFAULT_EXIT_MONTHLY_YIELD_PERCENT * 100))
     : null
@@ -142,10 +148,66 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
     annualRevenueManwon,
     roiWithLoanPercent,
     monthlyCashYieldPercent,
+    loanResilienceRatio: loanResilience.ratio,
+    loanResilienceStatus: loanResilience.status,
+    loanResilienceLabel: loanResilience.label,
+    loanResilienceMessage: loanResilience.message,
     exitBuyerRequiredCashEok,
     exitEstimatedSalePriceEok,
     exitSalePriceGapEok,
     roiNoLoanPercent,
+  }
+}
+
+function calculateLoanResilience(
+  monthlyNetManwon: number,
+  totalMonthlyInterestManwon: number,
+): {
+  ratio: number | null
+  status: LoanResilienceStatus
+  label: string
+  message: string
+} {
+  if (totalMonthlyInterestManwon <= 0) {
+    return {
+      ratio: null,
+      status: 'no-loan',
+      label: '대출 없음',
+      message: '대출 이자 부담이 없어요.',
+    }
+  }
+
+  const ratio = roundPercent(monthlyNetManwon / totalMonthlyInterestManwon)
+  if (ratio >= 2) {
+    return {
+      ratio,
+      status: 'stable',
+      label: '안정',
+      message: '이자 부담을 충분히 감당하는 편이에요.',
+    }
+  }
+  if (ratio >= 1.2) {
+    return {
+      ratio,
+      status: 'caution',
+      label: '주의',
+      message: '버틸 수는 있지만 매출이 흔들리면 부담이 커질 수 있어요.',
+    }
+  }
+  if (ratio >= 1) {
+    return {
+      ratio,
+      status: 'danger',
+      label: '위험',
+      message: '이자를 내고 나면 남는 여유가 거의 없어요.',
+    }
+  }
+
+  return {
+    ratio,
+    status: 'deficit',
+    label: '적자',
+    message: '현재 수익으로는 이자 부담을 감당하기 어려워요.',
   }
 }
 
