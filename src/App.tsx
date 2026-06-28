@@ -266,8 +266,8 @@ function DirectPurchaseCalculator({
         <p className="eyebrow">직접 매입 투자 의사결정 도구</p>
         <h1 id="calculator-title">직접 매입 수익률 계산기</h1>
         <p>
-          매물 종류 선택 → 매매가 입력하면 부대비용·대출이 자동 채워지고, 대출 시·무대출 기준
-          수익률이 동시에 계산돼요. <strong>(단위: 억원 / 만원)</strong>
+          매물 종류와 매매가만 넣으면 부대비용·대출·수익률을 한 번에 비교해요.
+          <strong> 단위는 억원 / 만원</strong>
         </p>
       </header>
 
@@ -302,7 +302,7 @@ function DirectPurchaseCalculator({
                 unit="억원"
                 value={values.purchasePriceEok}
                 onChange={updatePurchasePrice}
-                help="먼저 계약가만 넣으면 나머지 비용은 자동으로 잡혀요."
+                help="계약가 입력 시 자동 계산"
               />
             </div>
 
@@ -317,28 +317,28 @@ function DirectPurchaseCalculator({
                   unit="억원"
                   value={effective.acquisitionTaxEok}
                   onChange={(value) => updateAuto('acquisitionTaxEok', value)}
-                  help="매매가 × 세율 자동 입력"
+                  help="매매가 × 세율"
                 />
                 <MoneyInput
                   label="법무사 비용"
                   unit="억원"
                   value={effective.legalFeeEok}
                   onChange={(value) => updateAuto('legalFeeEok', value)}
-                  help="3억미만 0.3% / 3~10억 0.2% / 10억+ 0.15%"
+                  help="구간별 자동 계산"
                 />
                 <MoneyInput
                   label="중개수수료"
                   unit="억원"
                   value={effective.brokerageFeeEok}
                   onChange={(value) => updateAuto('brokerageFeeEok', value)}
-                  help="매매가 × 0.9% 자동 입력"
+                  help="매매가 × 0.9%"
                 />
                 <MoneyInput
                   label="기타비용 (권리금 등)"
                   unit="억원"
                   value={values.otherCostEok}
                   onChange={(value) => updateFree('otherCostEok', value)}
-                  help="회수 보장 안 되는 자금은 별도로 보수적으로 잡으세요."
+                  help="권리금·예비비 등"
                 />
               </div>
             </details>
@@ -358,7 +358,7 @@ function DirectPurchaseCalculator({
               unit="%"
               value={values.ltvPercent}
               onChange={updateLtvPercent}
-              help="매매가 대비 대출 비율이에요. LTV를 바꾸면 대출금액도 같이 바뀌어요."
+              help="매매가 대비 대출 비율"
               inputMode="decimal"
             />
             <MoneyInput
@@ -366,7 +366,7 @@ function DirectPurchaseCalculator({
               unit="억원"
               value={effectiveLoanAmountEok}
               onChange={updateLoanAmount}
-              help={`금액을 직접 바꾸면 LTV도 ${values.ltvPercent || 0}%로 자동 보정돼요.`}
+              help="직접 입력 시 LTV 자동 보정"
             />
             <MoneyInput
               label="대출 금리 (연)"
@@ -380,14 +380,14 @@ function DirectPurchaseCalculator({
               unit="억원"
               value={values.tourismLoanAmountEok}
               onChange={(value) => updateFree('tourismLoanAmountEok', value)}
-              help="공사비로 받는 관광기금 대출이 있으면 입력하세요."
+              help="공사비 대출이 있으면 입력"
             />
             <MoneyInput
               label="관광기금 금리 (연)"
               unit="%"
               value={values.tourismLoanAnnualInterestRate}
               onChange={(value) => updateFree('tourismLoanAnnualInterestRate', value)}
-              help="관광기금 대출금액에만 적용되는 별도 금리예요."
+              help="관광기금 별도 금리"
               inputMode="decimal"
             />
             <MoneyInput
@@ -395,7 +395,7 @@ function DirectPurchaseCalculator({
               unit="만원"
               value={values.monthlyRevenueManwon}
               onChange={(value) => updateFree('monthlyRevenueManwon', value)}
-              help="운영비·수수료를 미리 뺀 순매출 기준을 권장해요."
+              help="운영비 차감 후 순매출"
             />
           </div>
 
@@ -405,9 +405,11 @@ function DirectPurchaseCalculator({
 
       <aside className="notice">
         <strong>읽는 법</strong>
-        <span>
-          ①번은 대출 이자까지 반영한 실제 운영 수익률이에요. 월 수익률과 목표 월순수익은 모두 대출을 뺀 실투입금 기준으로 계산해요. ②번은 비교용 무대출 기준이고, 괄호 안 총투입금은 대출 포함 전체 자금 규모예요. 월 매출은 운영비·수수료를 미리 뺀 순매출로 입력해야 정확해요.
-        </span>
+        <ul className="notice-list">
+          <li>①번은 대출 이자 반영 후 실제 운영 수익률</li>
+          <li>월 수익률·목표 월순수익은 실투입금 기준</li>
+          <li>월 매출은 운영비·수수료 차감 후 순매출로 입력</li>
+        </ul>
       </aside>
     </>
   )
@@ -459,7 +461,7 @@ function ExitEstimatePanel({
       </dl>
 
       <p className="exit-caveat">
-        예: 월 순수익 4,500만원이면 필요 에쿼티 15억, LTV 80% 기준 매수 가능가는 75억으로 봅니다.
+        예: 월순익 4,500만원 → 에쿼티 15억 → 매수가 75억
       </p>
     </section>
   )
@@ -1386,8 +1388,8 @@ function LoanResilienceCard({ result }: { result: ReturnType<typeof calculateInv
       </div>
       <small>
         {result.loanResilienceRatio === null
-          ? '월이자가 없어서 버팀력 계산을 생략했어요.'
-          : `월 순수익이 월이자의 ${formatLoanResilienceRatio(result.loanResilienceRatio)}예요.`}
+          ? '이자 부담 없음'
+          : `이자 대비 ${formatLoanResilienceRatio(result.loanResilienceRatio)}`}
       </small>
     </article>
   )
