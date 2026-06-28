@@ -50,6 +50,7 @@ export const DEFAULT_ANNUAL_INTEREST_RATE = 5
 export const DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE = 2.1
 export const DEFAULT_EXIT_BUYER_LTV_PERCENT = 80
 export const DEFAULT_EXIT_MONTHLY_YIELD_PERCENT = 3
+export const DEFAULT_OTHER_COST_PERCENT = 6
 
 const TARGET_MONTHLY_NET_MANWON_PER_EOK = 300
 
@@ -75,6 +76,10 @@ export function defaultLegalFeeEok(purchasePriceEok: number): number {
 
 export function defaultBrokerageFeeEok(purchasePriceEok: number): number {
   return roundEok(purchasePriceEok * 0.009)
+}
+
+export function defaultOtherCostEok(purchasePriceEok: number): number {
+  return roundEok(purchasePriceEok * (DEFAULT_OTHER_COST_PERCENT / 100))
 }
 
 export function defaultLoanAmountEok(

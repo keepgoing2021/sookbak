@@ -11,6 +11,7 @@ import {
   defaultLegalFeeEok,
   defaultLoanAmountEok,
   defaultLtvPercent,
+  defaultOtherCostEok,
 } from './calculator'
 
 describe('direct purchase calculator', () => {
@@ -24,7 +25,29 @@ describe('direct purchase calculator', () => {
     expect(defaultAcquisitionTaxEok('commercial', 12)).toBe(0.552)
     expect(defaultLegalFeeEok(12)).toBe(0.018)
     expect(defaultBrokerageFeeEok(12)).toBe(0.108)
+    expect(defaultOtherCostEok(12)).toBe(0.72)
     expect(defaultLoanAmountEok(12)).toBe(9.6)
+  })
+
+  it('uses 6% of purchase price as the default miscellaneous acquisition cost', () => {
+    expect(defaultOtherCostEok(15)).toBe(0.9)
+
+    const result = calculateInvestment({
+      propertyType: 'commercial',
+      purchasePriceEok: 15,
+      acquisitionTaxEok: defaultAcquisitionTaxEok('commercial', 15),
+      legalFeeEok: defaultLegalFeeEok(15),
+      brokerageFeeEok: defaultBrokerageFeeEok(15),
+      otherCostEok: defaultOtherCostEok(15),
+      loanAmountEok: defaultLoanAmountEok(15, 80),
+      annualInterestRate: 5,
+      tourismLoanAmountEok: 0,
+      tourismLoanAnnualInterestRate: 0,
+      monthlyRevenueManwon: 0,
+    })
+
+    expect(result.sideCostsEok).toBe(1.748)
+    expect(result.cashInvestedWithLoanEok).toBe(4.748)
   })
 
   it('auto-calculates default loan amount from a custom LTV percent', () => {

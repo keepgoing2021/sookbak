@@ -6,6 +6,7 @@ import {
   DEFAULT_EXIT_BUYER_LTV_PERCENT,
   DEFAULT_EXIT_MONTHLY_YIELD_PERCENT,
   DEFAULT_LTV_PERCENT,
+  DEFAULT_OTHER_COST_PERCENT,
   DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE,
   calculateInvestment,
   defaultAcquisitionTaxEok,
@@ -13,6 +14,7 @@ import {
   defaultLegalFeeEok,
   defaultLoanAmountEok,
   defaultLtvPercent,
+  defaultOtherCostEok,
   formatEok,
   formatManwon,
   formatPercent,
@@ -51,7 +53,7 @@ type Values = {
   acquisitionTaxEok: string | null
   legalFeeEok: string | null
   brokerageFeeEok: string | null
-  otherCostEok: string
+  otherCostEok: string | null
   loanAmountEok: string
   ltvPercent: string
   annualInterestRate: string
@@ -60,10 +62,9 @@ type Values = {
   monthlyRevenueManwon: string
 }
 
-type AutoFieldKey = 'acquisitionTaxEok' | 'legalFeeEok' | 'brokerageFeeEok'
+type AutoFieldKey = 'acquisitionTaxEok' | 'legalFeeEok' | 'brokerageFeeEok' | 'otherCostEok'
 type FreeFieldKey =
   | 'purchasePriceEok'
-  | 'otherCostEok'
   | 'ltvPercent'
   | 'annualInterestRate'
   | 'tourismLoanAmountEok'
@@ -81,7 +82,7 @@ const initialValues: Values = {
   acquisitionTaxEok: null,
   legalFeeEok: null,
   brokerageFeeEok: null,
-  otherCostEok: '',
+  otherCostEok: null,
   loanAmountEok: '',
   ltvPercent: String(DEFAULT_LTV_PERCENT),
   annualInterestRate: String(DEFAULT_ANNUAL_INTEREST_RATE),
@@ -172,12 +173,13 @@ function DirectPurchaseCalculator({
 
   const autoDefaults = useMemo(() => {
     if (!hasPurchasePrice) {
-      return { acquisitionTaxEok: '', legalFeeEok: '', brokerageFeeEok: '' }
+      return { acquisitionTaxEok: '', legalFeeEok: '', brokerageFeeEok: '', otherCostEok: '' }
     }
     return {
       acquisitionTaxEok: stringify(defaultAcquisitionTaxEok(propertyType, purchasePriceEok)),
       legalFeeEok: stringify(defaultLegalFeeEok(purchasePriceEok)),
       brokerageFeeEok: stringify(defaultBrokerageFeeEok(purchasePriceEok)),
+      otherCostEok: stringify(defaultOtherCostEok(purchasePriceEok)),
     }
   }, [propertyType, purchasePriceEok, hasPurchasePrice])
 
@@ -185,6 +187,7 @@ function DirectPurchaseCalculator({
     acquisitionTaxEok: values.acquisitionTaxEok ?? autoDefaults.acquisitionTaxEok,
     legalFeeEok: values.legalFeeEok ?? autoDefaults.legalFeeEok,
     brokerageFeeEok: values.brokerageFeeEok ?? autoDefaults.brokerageFeeEok,
+    otherCostEok: values.otherCostEok ?? autoDefaults.otherCostEok,
   }
 
   const effectiveLoanAmountEok = values.loanAmountEok ||
@@ -197,7 +200,7 @@ function DirectPurchaseCalculator({
       acquisitionTaxEok: toNumber(effective.acquisitionTaxEok),
       legalFeeEok: toNumber(effective.legalFeeEok),
       brokerageFeeEok: toNumber(effective.brokerageFeeEok),
-      otherCostEok: toNumber(values.otherCostEok),
+      otherCostEok: toNumber(effective.otherCostEok),
       loanAmountEok: toNumber(effectiveLoanAmountEok),
       annualInterestRate: toNumber(values.annualInterestRate),
       tourismLoanAmountEok: toNumber(values.tourismLoanAmountEok),
@@ -210,8 +213,8 @@ function DirectPurchaseCalculator({
       effective.acquisitionTaxEok,
       effective.legalFeeEok,
       effective.brokerageFeeEok,
+      effective.otherCostEok,
       effectiveLoanAmountEok,
-      values.otherCostEok,
       values.annualInterestRate,
       values.tourismLoanAmountEok,
       values.tourismLoanAnnualInterestRate,
@@ -334,11 +337,11 @@ function DirectPurchaseCalculator({
                   help="매매가 × 0.9%"
                 />
                 <MoneyInput
-                  label="기타비용 (권리금 등)"
+                  label="기타비용"
                   unit="억원"
-                  value={values.otherCostEok}
-                  onChange={(value) => updateFree('otherCostEok', value)}
-                  help="권리금·예비비 등"
+                  value={effective.otherCostEok}
+                  onChange={(value) => updateAuto('otherCostEok', value)}
+                  help={`매매가 × ${DEFAULT_OTHER_COST_PERCENT}%`}
                 />
               </div>
             </details>
@@ -408,6 +411,7 @@ function DirectPurchaseCalculator({
         <ul className="notice-list">
           <li>①번은 대출 이자 반영 후 실제 운영 수익률</li>
           <li>월 수익률·목표 월순수익은 실투입금 기준</li>
+          <li>기타비용은 실무 기준으로 매매가의 6%를 기본 반영</li>
           <li>월 매출은 운영비·수수료 차감 후 순매출로 입력</li>
         </ul>
       </aside>
@@ -1052,6 +1056,10 @@ function ConstructionRiskSection({
       directValues.brokerageFeeEok === null
         ? defaultBrokerageFeeEok(directPurchasePrice)
         : toNumber(directValues.brokerageFeeEok),
+    otherCostEok:
+      directValues.otherCostEok === null
+        ? defaultOtherCostEok(directPurchasePrice)
+        : toNumber(directValues.otherCostEok),
     loanAmountEok:
       directValues.loanAmountEok === null
         ? defaultLoanAmountEok(directPurchasePrice, toNumber(directValues.ltvPercent))
@@ -1063,7 +1071,7 @@ function ConstructionRiskSection({
     acquisitionTaxEok: directEffective.acquisitionTaxEok,
     legalFeeEok: directEffective.legalFeeEok,
     brokerageFeeEok: directEffective.brokerageFeeEok,
-    otherCostEok: toNumber(directValues.otherCostEok),
+    otherCostEok: directEffective.otherCostEok,
     loanAmountEok: directEffective.loanAmountEok,
     annualInterestRate: toNumber(directValues.annualInterestRate),
     tourismLoanAmountEok: toNumber(directValues.tourismLoanAmountEok),
