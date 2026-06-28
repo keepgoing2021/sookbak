@@ -1604,6 +1604,45 @@ h1 {
   top: 20px;
 }
 
+.direct-form-grid {
+  grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
+  grid-template-areas:
+    "investment loan"
+    "exit guidance"
+    ". detail";
+  align-items: start;
+}
+
+.direct-left-column,
+.direct-right-column {
+  display: contents;
+}
+
+.direct-form-grid .investment-panel {
+  grid-area: investment;
+}
+
+.direct-form-grid .loan-panel {
+  grid-area: loan;
+}
+
+.direct-form-grid .deferred-exit-panel {
+  grid-area: exit;
+  margin-top: 0;
+}
+
+.direct-form-grid .result-panel-guidance {
+  grid-area: guidance;
+}
+
+.direct-form-grid .result-panel-detail {
+  grid-area: detail;
+}
+
+.direct-right-column {
+  position: static;
+}
+
 .panel,
 .advanced-panel,
 .result-panel,
@@ -1934,6 +1973,16 @@ h1 {
 
   .form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .direct-form-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "investment"
+      "loan"
+      "guidance"
+      "detail"
+      "exit";
   }
 
   .guidance-grid {

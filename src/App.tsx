@@ -275,8 +275,8 @@ function DirectPurchaseCalculator({
         </p>
       </header>
 
-      <div className="form-grid">
-        <section className="left-column">
+      <div className="form-grid direct-form-grid">
+        <section className="left-column direct-left-column">
           <div className="panel investment-panel" aria-labelledby="investment-title">
             <div className="panel-heading">
               <span className="section-index">01</span>
@@ -353,7 +353,7 @@ function DirectPurchaseCalculator({
           </div>
         </section>
 
-        <section className="right-column">
+        <section className="right-column direct-right-column">
           <div className="panel loan-panel" aria-labelledby="loan-title">
             <div className="panel-heading blue">
               <span className="section-index">02</span>
