@@ -422,6 +422,176 @@ h1 {
   color: #ff5b00;
 }
 
+.decision-card,
+.net-comparison-card,
+.recommended-price-card {
+  margin-bottom: 14px;
+  border-radius: 16px;
+  border: 1px solid #d8e2ef;
+  background: #ffffff;
+}
+
+.decision-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 18px;
+}
+
+.decision-card span,
+.net-comparison-card span,
+.recommended-price-card span {
+  display: block;
+  color: #6b7a90;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.decision-card strong {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: white;
+  background: #64748b;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.decision-card h3 {
+  margin: 10px 0 0;
+  color: #111827;
+  font-size: 20px;
+  line-height: 1.25;
+  letter-spacing: -0.04em;
+  word-break: keep-all;
+}
+
+.decision-card p,
+.recommended-price-card p {
+  margin-top: 7px;
+  color: #5f6c82;
+  font-size: 13px;
+  line-height: 1.45;
+  word-break: keep-all;
+}
+
+.decision-card small,
+.recommended-price-card small {
+  flex: 0 0 170px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: right;
+  word-break: keep-all;
+}
+
+.decision-card-reviewable {
+  border-color: #a7f3d0;
+  background: linear-gradient(180deg, #ecfdf5, #ffffff);
+}
+
+.decision-card-reviewable strong {
+  background: #059669;
+}
+
+.decision-card-needs-adjustment {
+  border-color: #fde68a;
+  background: linear-gradient(180deg, #fffbeb, #ffffff);
+}
+
+.decision-card-needs-adjustment strong {
+  background: #d97706;
+}
+
+.decision-card-expensive {
+  border-color: #fecaca;
+  background: linear-gradient(180deg, #fef2f2, #ffffff);
+}
+
+.decision-card-expensive strong {
+  background: #dc2626;
+}
+
+.net-comparison-card,
+.recommended-price-card {
+  padding: 16px 18px;
+}
+
+.net-comparison-card {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  background: linear-gradient(180deg, #f8fbff, #ffffff);
+}
+
+.comparison-copy strong {
+  display: block;
+  margin-top: 5px;
+  color: #172033;
+  font-size: 17px;
+  line-height: 1.35;
+  letter-spacing: -0.03em;
+  word-break: keep-all;
+}
+
+.net-comparison-card dl {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 0;
+}
+
+.net-comparison-card dl div {
+  padding: 12px;
+  border-radius: 12px;
+  background: #f2f6fb;
+}
+
+.net-comparison-card dt {
+  color: #7c889d;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.net-comparison-card dd {
+  margin: 6px 0 0;
+  color: #172033;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.net-comparison-card .positive dd {
+  color: #047857;
+}
+
+.net-comparison-card .negative dd {
+  color: #dc2626;
+}
+
+.recommended-price-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  border-color: #bfdbfe;
+  background: linear-gradient(180deg, #eff6ff, #ffffff);
+}
+
+.recommended-price-card strong {
+  display: block;
+  margin-top: 5px;
+  color: #1c66ff;
+  font-size: clamp(30px, 4vw, 42px);
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
 .loan-resilience {
   display: flex;
   justify-content: space-between;
@@ -2168,13 +2338,24 @@ h1,
     max-width: 30em;
   }
 
-  .loan-resilience {
+  .loan-resilience,
+  .decision-card,
+  .recommended-price-card {
     display: grid;
     gap: 10px;
   }
 
-  .loan-resilience small {
+  .loan-resilience small,
+  .decision-card small,
+  .recommended-price-card small {
     justify-self: start;
+    flex: none;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .net-comparison-card dl {
+    grid-template-columns: 1fr;
   }
 
   .exit-caveat {

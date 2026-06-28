@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   calculateInvestment,
+  calculatePurchaseDecision,
+  calculateRecommendedPurchasePriceEok,
   DEFAULT_ANNUAL_INTEREST_RATE,
   DEFAULT_EXIT_BUYER_LTV_PERCENT,
   DEFAULT_EXIT_MONTHLY_YIELD_PERCENT,
@@ -162,6 +164,35 @@ describe('direct purchase calculator', () => {
     expect(result.totalInvestmentEok).toBe(42.26)
     expect(result.cashInvestedWithLoanEok).toBe(10.26)
     expect(result.targetMonthlyNetManwon).toBe(3078)
+  })
+
+  it('classifies purchase decision from expected monthly net versus required monthly net', () => {
+    expect(calculatePurchaseDecision(1200, 1000)).toMatchObject({
+      status: 'reviewable',
+      label: '검토 가능',
+      gapManwon: 200,
+    })
+    expect(calculatePurchaseDecision(850, 1000)).toMatchObject({
+      status: 'needs-adjustment',
+      label: '조건 조정 필요',
+      gapManwon: -150,
+    })
+    expect(calculatePurchaseDecision(700, 1000)).toMatchObject({
+      status: 'expensive',
+      label: '보수적으로 비쌈',
+      gapManwon: -300,
+    })
+  })
+
+  it('reverse-calculates the maximum purchase price from current monthly net and financing assumptions', () => {
+    const recommendedPrice = calculateRecommendedPurchasePriceEok({
+      propertyType: 'commercial',
+      monthlyNetManwon: 1200,
+      ltvPercent: 80,
+      otherCostEok: 0,
+    })
+
+    expect(recommendedPrice).toBe(15.598)
   })
 
   it('returns null ROI when there is no purchase price input', () => {

@@ -8,6 +8,8 @@ import {
   DEFAULT_LTV_PERCENT,
   DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE,
   calculateInvestment,
+  calculatePurchaseDecision,
+  calculateRecommendedPurchasePriceEok,
   defaultAcquisitionTaxEok,
   defaultBrokerageFeeEok,
   defaultLegalFeeEok,
@@ -401,7 +403,13 @@ function DirectPurchaseCalculator({
             />
           </div>
 
-          <DirectResultPanel hasPurchasePrice={hasPurchasePrice} result={result} />
+          <DirectResultPanel
+            hasPurchasePrice={hasPurchasePrice}
+            result={result}
+            propertyType={propertyType}
+            ltvPercent={ltvPercent}
+            otherCostEok={toNumber(values.otherCostEok)}
+          />
         </section>
       </div>
 
@@ -1305,9 +1313,15 @@ function MoneyInput({
 function DirectResultPanel({
   hasPurchasePrice,
   result,
+  propertyType,
+  ltvPercent,
+  otherCostEok,
 }: {
   hasPurchasePrice: boolean
   result: ReturnType<typeof calculateInvestment>
+  propertyType: PropertyType
+  ltvPercent: number
+  otherCostEok: number
 }) {
   if (!hasPurchasePrice) {
     return (
@@ -1318,8 +1332,26 @@ function DirectResultPanel({
     )
   }
 
+  const decision = calculatePurchaseDecision(result.monthlyNetManwon, result.targetMonthlyNetManwon)
+  const recommendedPurchasePriceEok = calculateRecommendedPurchasePriceEok({
+    propertyType,
+    monthlyNetManwon: result.monthlyNetManwon,
+    ltvPercent,
+    otherCostEok,
+  })
+  const purchasePriceGapEok = recommendedPurchasePriceEok === null
+    ? null
+    : recommendedPurchasePriceEok - (result.totalInvestmentEok - result.sideCostsEok)
+
   return (
     <section className="result-panel" aria-live="polite">
+      <DecisionCard decision={decision} />
+      <NetTargetComparison result={result} />
+      <RecommendedPurchasePriceCard
+        recommendedPurchasePriceEok={recommendedPurchasePriceEok}
+        purchasePriceGapEok={purchasePriceGapEok}
+      />
+
       <div className="result-summary">
         <Metric label="부대비용 합계" value={formatEok(result.sideCostsEok)} />
         <Metric
@@ -1375,6 +1407,81 @@ function DirectResultPanel({
         </article>
       </div>
     </section>
+  )
+}
+
+function DecisionCard({
+  decision,
+}: {
+  decision: ReturnType<typeof calculatePurchaseDecision>
+}) {
+  return (
+    <article className={`decision-card decision-card-${decision.status}`}>
+      <div>
+        <span>판단 결과</span>
+        <strong>{decision.label}</strong>
+        <h3>{decision.headline}</h3>
+        <p>{decision.message}</p>
+      </div>
+      <small>{decision.action}</small>
+    </article>
+  )
+}
+
+function NetTargetComparison({ result }: { result: ReturnType<typeof calculateInvestment> }) {
+  const gapLabel = result.targetMonthlyNetGapManwon >= 0 ? '남음' : '부족'
+
+  return (
+    <article className="net-comparison-card">
+      <div className="comparison-copy">
+        <span>필요 월순수익 vs 예상 월순수익</span>
+        <strong>
+          이 매물을 사려면 월순수익이 최소 {formatManwon(result.targetMonthlyNetManwon)}은 나와야 합니다.
+        </strong>
+      </div>
+      <dl>
+        <div>
+          <dt>필요한 월순수익</dt>
+          <dd>{formatManwon(result.targetMonthlyNetManwon)}</dd>
+        </div>
+        <div>
+          <dt>현재 예상 월순수익</dt>
+          <dd>{formatManwon(result.monthlyNetManwon)}</dd>
+        </div>
+        <div className={result.targetMonthlyNetGapManwon >= 0 ? 'positive' : 'negative'}>
+          <dt>차이</dt>
+          <dd>
+            {formatManwonSigned(result.targetMonthlyNetGapManwon)} {gapLabel}
+          </dd>
+        </div>
+      </dl>
+    </article>
+  )
+}
+
+function RecommendedPurchasePriceCard({
+  recommendedPurchasePriceEok,
+  purchasePriceGapEok,
+}: {
+  recommendedPurchasePriceEok: number | null
+  purchasePriceGapEok: number | null
+}) {
+  const hasRecommendation = recommendedPurchasePriceEok !== null && purchasePriceGapEok !== null
+  const gapCopy = !hasRecommendation
+    ? '월순수익을 입력하면 역산됩니다.'
+    : purchasePriceGapEok >= 0
+      ? `현재 매입가는 권장 상한보다 ${formatEok(purchasePriceGapEok)} 낮습니다.`
+      : `현재 매입가를 약 ${formatEok(Math.abs(purchasePriceGapEok))} 낮춰야 합니다.`
+
+  return (
+    <article className="recommended-price-card">
+      <div>
+        <span>이 수익이면 얼마에 사야 할까?</span>
+        <strong>{hasRecommendation ? formatEok(recommendedPurchasePriceEok) : '-'}</strong>
+        <p>{gapCopy}</p>
+      </div>
+      <small>현재 월순수익이 목표 기준을 맞추는 매입가 상한입니다.</small>
+    </article>
   )
 }
 

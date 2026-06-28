@@ -1,5 +1,22 @@
 export type PropertyType = 'commercial' | 'housing' | 'land'
 export type LoanResilienceStatus = 'stable' | 'caution' | 'danger' | 'deficit' | 'no-loan'
+export type PurchaseDecisionStatus = 'reviewable' | 'needs-adjustment' | 'expensive' | 'empty'
+
+export interface PurchaseDecision {
+  status: PurchaseDecisionStatus
+  label: string
+  headline: string
+  message: string
+  action: string
+  gapManwon: number
+}
+
+export interface RecommendedPurchasePriceInput {
+  propertyType: PropertyType
+  monthlyNetManwon: number
+  ltvPercent: number
+  otherCostEok: number
+}
 
 export interface CalculatorInput {
   propertyType: PropertyType
@@ -87,6 +104,89 @@ export function defaultLoanAmountEok(
 export function defaultLtvPercent(purchasePriceEok: number, loanAmountEok: number): number {
   if (purchasePriceEok <= 0) return 0
   return roundPercent((loanAmountEok / purchasePriceEok) * 100)
+}
+
+export function calculatePurchaseDecision(
+  monthlyNetManwon: number,
+  targetMonthlyNetManwon: number,
+): PurchaseDecision {
+  const gapManwon = roundManwon(monthlyNetManwon - targetMonthlyNetManwon)
+
+  if (targetMonthlyNetManwon <= 0) {
+    return {
+      status: 'empty',
+      label: '판단 대기',
+      headline: '매매가와 예상 수익을 넣으면 판단할 수 있어요',
+      message: '실투입금 기준으로 필요한 월순수익과 예상 월순수익을 비교합니다.',
+      action: '먼저 매매가와 월 매출을 입력해보세요.',
+      gapManwon,
+    }
+  }
+
+  if (monthlyNetManwon >= targetMonthlyNetManwon) {
+    return {
+      status: 'reviewable',
+      label: '검토 가능',
+      headline: '현재 조건에서는 검토해볼 만한 매물입니다',
+      message: `필요 월순수익보다 ${formatManwon(gapManwon)} 여유가 있습니다.`,
+      action: '건축물대장·소방·공사비 실사로 넘어가세요.',
+      gapManwon,
+    }
+  }
+
+  if (monthlyNetManwon >= targetMonthlyNetManwon * 0.8) {
+    return {
+      status: 'needs-adjustment',
+      label: '조건 조정 필요',
+      headline: '수익 구조나 매입가 조정이 필요합니다',
+      message: `목표 월순수익보다 ${formatManwon(Math.abs(gapManwon))} 부족합니다.`,
+      action: '매입가 협상·객실 수익·공사비 가정을 다시 확인하세요.',
+      gapManwon,
+    }
+  }
+
+  return {
+    status: 'expensive',
+    label: '보수적으로 비쌈',
+    headline: '보수적으로 보면 아직 비싼 매물입니다',
+    message: `목표 월순수익보다 ${formatManwon(Math.abs(gapManwon))} 부족합니다.`,
+    action: '현재 가격에서는 보류하거나 큰 폭의 가격 조정이 필요합니다.',
+    gapManwon,
+  }
+}
+
+export function calculateRecommendedPurchasePriceEok(
+  input: RecommendedPurchasePriceInput,
+): number | null {
+  if (input.monthlyNetManwon <= 0 || input.ltvPercent >= 100) return null
+
+  const targetCashEok = input.monthlyNetManwon / TARGET_MONTHLY_NET_MANWON_PER_EOK
+  let low = 0
+  let high = Math.max(1, targetCashEok / Math.max(0.01, 1 - input.ltvPercent / 100))
+
+  while (cashInvestedForPriceEok(input, high) < targetCashEok && high < 10000) {
+    high *= 2
+  }
+
+  for (let i = 0; i < 60; i += 1) {
+    const mid = (low + high) / 2
+    if (cashInvestedForPriceEok(input, mid) <= targetCashEok) {
+      low = mid
+    } else {
+      high = mid
+    }
+  }
+
+  return roundEok(low)
+}
+
+function cashInvestedForPriceEok(input: RecommendedPurchasePriceInput, purchasePriceEok: number): number {
+  const sideCostsEok =
+    defaultAcquisitionTaxEok(input.propertyType, purchasePriceEok) +
+    defaultLegalFeeEok(purchasePriceEok) +
+    defaultBrokerageFeeEok(purchasePriceEok) +
+    input.otherCostEok
+  return purchasePriceEok + sideCostsEok - purchasePriceEok * (input.ltvPercent / 100)
 }
 
 export function calculateInvestment(input: CalculatorInput): CalculatorResult {
