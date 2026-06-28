@@ -348,7 +348,9 @@ function DirectPurchaseCalculator({
             </details>
           </div>
 
-          <ExitEstimatePanel hasPurchasePrice={hasPurchasePrice} result={result} />
+          <div className="deferred-exit-panel">
+            <ExitEstimatePanel hasPurchasePrice={hasPurchasePrice} result={result} />
+          </div>
         </section>
 
         <section className="right-column">
@@ -1348,69 +1350,84 @@ function DirectResultPanel({
     : recommendedPurchasePriceEok - (result.totalInvestmentEok - result.sideCostsEok)
 
   return (
-    <section className="result-panel" aria-live="polite">
-      <DecisionCard decision={decision} />
-      <NetTargetComparison result={result} />
-      <RecommendedPurchasePriceCard
-        recommendedPurchasePriceEok={recommendedPurchasePriceEok}
-        purchasePriceGapEok={purchasePriceGapEok}
-      />
+    <>
+      <section className="result-panel result-panel-guidance" aria-live="polite">
+        <div className="result-section-heading">
+          <span className="section-index">2-1</span>
+          <h2>매입 판단</h2>
+        </div>
+        <DecisionCard decision={decision} />
+        <div className="guidance-grid">
+          <NetTargetComparison result={result} />
+          <RecommendedPurchasePriceCard
+            recommendedPurchasePriceEok={recommendedPurchasePriceEok}
+            purchasePriceGapEok={purchasePriceGapEok}
+          />
+        </div>
+      </section>
 
-      <div className="result-summary">
-        <Metric label="부대비용 합계" value={formatEok(result.sideCostsEok)} />
-        <Metric
-          label="실투입금"
-          value={`${formatEok(result.cashInvestedWithLoanEok)} (총 ${formatEok(result.totalInvestmentEok)})`}
-        />
-        <Metric label="담보대출 월이자" value={formatManwon(result.monthlyInterestManwon)} />
-        <Metric label="관광기금 월이자" value={formatManwon(result.tourismLoanMonthlyInterestManwon)} />
-        <Metric label="총 월이자" value={formatManwon(result.totalMonthlyInterestManwon)} />
-        <Metric label="월 순수익" value={formatManwon(result.monthlyNetManwon)} highlight />
-        <Metric label="목표 월순수익" value={formatManwon(result.targetMonthlyNetManwon)} />
-        <Metric label="목표 대비" value={formatManwonSigned(result.targetMonthlyNetGapManwon)} />
-      </div>
+      <section className="result-panel result-panel-detail" aria-live="polite">
+        <div className="result-section-heading compact">
+          <span className="section-index">2-2</span>
+          <h2>상세 수익 구조</h2>
+        </div>
 
-      <LoanResilienceCard result={result} />
+        <div className="result-summary">
+          <Metric label="부대비용 합계" value={formatEok(result.sideCostsEok)} />
+          <Metric
+            label="실투입금"
+            value={`${formatEok(result.cashInvestedWithLoanEok)} (총 ${formatEok(result.totalInvestmentEok)})`}
+          />
+          <Metric label="담보대출 월이자" value={formatManwon(result.monthlyInterestManwon)} />
+          <Metric label="관광기금 월이자" value={formatManwon(result.tourismLoanMonthlyInterestManwon)} />
+          <Metric label="총 월이자" value={formatManwon(result.totalMonthlyInterestManwon)} />
+          <Metric label="월 순수익" value={formatManwon(result.monthlyNetManwon)} highlight />
+          <Metric label="목표 월순수익" value={formatManwon(result.targetMonthlyNetManwon)} />
+          <Metric label="목표 대비" value={formatManwonSigned(result.targetMonthlyNetGapManwon)} />
+        </div>
 
-      <div className="scenario-grid">
-        <article className="scenario leverage">
-          <span>① 대출 시나리오</span>
-          <strong>{formatPercent(result.roiWithLoanPercent)}</strong>
-          <p>자기자본 기준 수익률</p>
-          <dl>
-            <div>
-              <dt>투입 자기자본</dt>
-              <dd>{formatEok(result.cashInvestedWithLoanEok)}</dd>
-            </div>
-            <div>
-              <dt>월 수익률</dt>
-              <dd>{formatPercent(result.monthlyCashYieldPercent)}</dd>
-            </div>
-            <div>
-              <dt>연 순수익</dt>
-              <dd>{formatManwon(result.annualNetManwon)}</dd>
-            </div>
-          </dl>
-        </article>
+        <LoanResilienceCard result={result} />
 
-        <article className="scenario no-loan">
-          <span>② 무대출 비교</span>
-          <strong>{formatPercent(result.roiNoLoanPercent)}</strong>
-          <p>총투입금 기준 수익률</p>
-          <dl>
-            <div>
-              <dt>투입금</dt>
-              <dd>{formatEok(result.totalInvestmentEok)}</dd>
-            </div>
+        <div className="scenario-grid">
+          <article className="scenario leverage">
+            <span>① 대출 시나리오</span>
+            <strong>{formatPercent(result.roiWithLoanPercent)}</strong>
+            <p>자기자본 기준 수익률</p>
+            <dl>
+              <div>
+                <dt>투입 자기자본</dt>
+                <dd>{formatEok(result.cashInvestedWithLoanEok)}</dd>
+              </div>
+              <div>
+                <dt>월 수익률</dt>
+                <dd>{formatPercent(result.monthlyCashYieldPercent)}</dd>
+              </div>
+              <div>
+                <dt>연 순수익</dt>
+                <dd>{formatManwon(result.annualNetManwon)}</dd>
+              </div>
+            </dl>
+          </article>
 
-            <div>
-              <dt>연 순매출</dt>
-              <dd>{formatManwon(result.annualRevenueManwon)}</dd>
-            </div>
-          </dl>
-        </article>
-      </div>
-    </section>
+          <article className="scenario no-loan">
+            <span>② 무대출 비교</span>
+            <strong>{formatPercent(result.roiNoLoanPercent)}</strong>
+            <p>총투입금 기준 수익률</p>
+            <dl>
+              <div>
+                <dt>투입금</dt>
+                <dd>{formatEok(result.totalInvestmentEok)}</dd>
+              </div>
+
+              <div>
+                <dt>연 순매출</dt>
+                <dd>{formatManwon(result.annualRevenueManwon)}</dd>
+              </div>
+            </dl>
+          </article>
+        </div>
+      </section>
+    </>
   )
 }
 

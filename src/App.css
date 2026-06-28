@@ -425,18 +425,65 @@ h1 {
 .decision-card,
 .net-comparison-card,
 .recommended-price-card {
-  margin-bottom: 14px;
   border-radius: 16px;
   border: 1px solid #d8e2ef;
   background: #ffffff;
 }
 
+.deferred-exit-panel {
+  margin-top: clamp(72px, 16vh, 180px);
+}
+
+.result-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  color: #2563eb;
+}
+
+.result-section-heading.compact {
+  margin-bottom: 10px;
+}
+
+.result-section-heading h2 {
+  margin: 0;
+  color: currentColor;
+  font-size: 18px;
+  letter-spacing: -0.03em;
+}
+
+.result-section-heading .section-index {
+  width: 36px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+
+.guidance-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  gap: 10px;
+}
+
+.result-panel-guidance {
+  padding: 16px;
+}
+
+.result-panel-detail {
+  padding: 16px;
+}
+
+.result-panel-detail .result-summary {
+  margin-bottom: 10px;
+}
+
 .decision-card {
   display: flex;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
   align-items: flex-start;
-  padding: 18px;
+  margin-bottom: 10px;
+  padding: 14px 16px;
 }
 
 .decision-card span,
@@ -460,10 +507,10 @@ h1 {
 }
 
 .decision-card h3 {
-  margin: 10px 0 0;
+  margin: 8px 0 0;
   color: #111827;
-  font-size: 20px;
-  line-height: 1.25;
+  font-size: 18px;
+  line-height: 1.22;
   letter-spacing: -0.04em;
   word-break: keep-all;
 }
@@ -526,7 +573,7 @@ h1 {
 
 .net-comparison-card,
 .recommended-price-card {
-  padding: 16px 18px;
+  padding: 14px;
 }
 
 .net-comparison-card {
@@ -594,9 +641,41 @@ h1 {
   display: block;
   margin-top: 5px;
   color: #1c66ff;
-  font-size: clamp(30px, 4vw, 42px);
+  font-size: clamp(28px, 3.4vw, 38px);
   line-height: 1;
   letter-spacing: -0.06em;
+}
+
+.guidance-grid .net-comparison-card dl {
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.guidance-grid .net-comparison-card dl div {
+  padding: 9px 10px;
+}
+
+.guidance-grid .net-comparison-card dd {
+  font-size: 15px;
+}
+
+.guidance-grid .recommended-price-card {
+  display: grid;
+  align-content: center;
+}
+
+.guidance-grid .recommended-price-card small {
+  flex: none;
+  margin-top: 8px;
+  text-align: left;
+}
+
+.result-panel-detail .loan-resilience {
+  margin-bottom: 10px;
+}
+
+.result-panel-detail .scenario strong {
+  font-size: clamp(26px, 3.4vw, 38px);
 }
 
 .loan-resilience {
@@ -1855,6 +1934,14 @@ h1 {
 
   .form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .guidance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .deferred-exit-panel {
+    margin-top: 0;
   }
 
   .result-summary {
