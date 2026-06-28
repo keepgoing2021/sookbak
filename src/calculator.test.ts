@@ -167,17 +167,22 @@ describe('direct purchase calculator', () => {
   })
 
   it('classifies purchase decision from expected monthly net versus required monthly net', () => {
-    expect(calculatePurchaseDecision(1200, 1000)).toMatchObject({
+    expect(calculatePurchaseDecision(1832, 1154, 4.76)).toMatchObject({
+      status: 'excellent',
+      label: '매우 좋음',
+      gapManwon: 678,
+    })
+    expect(calculatePurchaseDecision(1200, 1000, 3.6)).toMatchObject({
       status: 'reviewable',
       label: '검토 가능',
       gapManwon: 200,
     })
-    expect(calculatePurchaseDecision(850, 1000)).toMatchObject({
+    expect(calculatePurchaseDecision(850, 1000, 2.55)).toMatchObject({
       status: 'needs-adjustment',
       label: '조건 조정 필요',
       gapManwon: -150,
     })
-    expect(calculatePurchaseDecision(700, 1000)).toMatchObject({
+    expect(calculatePurchaseDecision(700, 1000, 2.1)).toMatchObject({
       status: 'expensive',
       label: '보수적으로 비쌈',
       gapManwon: -300,

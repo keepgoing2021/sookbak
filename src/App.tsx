@@ -1332,7 +1332,11 @@ function DirectResultPanel({
     )
   }
 
-  const decision = calculatePurchaseDecision(result.monthlyNetManwon, result.targetMonthlyNetManwon)
+  const decision = calculatePurchaseDecision(
+    result.monthlyNetManwon,
+    result.targetMonthlyNetManwon,
+    result.monthlyCashYieldPercent,
+  )
   const recommendedPurchasePriceEok = calculateRecommendedPurchasePriceEok({
     propertyType,
     monthlyNetManwon: result.monthlyNetManwon,

@@ -1,6 +1,6 @@
 export type PropertyType = 'commercial' | 'housing' | 'land'
 export type LoanResilienceStatus = 'stable' | 'caution' | 'danger' | 'deficit' | 'no-loan'
-export type PurchaseDecisionStatus = 'reviewable' | 'needs-adjustment' | 'expensive' | 'empty'
+export type PurchaseDecisionStatus = 'excellent' | 'reviewable' | 'needs-adjustment' | 'expensive' | 'empty'
 
 export interface PurchaseDecision {
   status: PurchaseDecisionStatus
@@ -109,6 +109,7 @@ export function defaultLtvPercent(purchasePriceEok: number, loanAmountEok: numbe
 export function calculatePurchaseDecision(
   monthlyNetManwon: number,
   targetMonthlyNetManwon: number,
+  monthlyCashYieldPercent: number | null = null,
 ): PurchaseDecision {
   const gapManwon = roundManwon(monthlyNetManwon - targetMonthlyNetManwon)
 
@@ -119,6 +120,17 @@ export function calculatePurchaseDecision(
       headline: '매매가와 예상 수익을 넣으면 판단할 수 있어요',
       message: '실투입금 기준으로 필요한 월순수익과 예상 월순수익을 비교합니다.',
       action: '먼저 매매가와 월 매출을 입력해보세요.',
+      gapManwon,
+    }
+  }
+
+  if (monthlyNetManwon >= targetMonthlyNetManwon && monthlyCashYieldPercent !== null && monthlyCashYieldPercent >= 4) {
+    return {
+      status: 'excellent',
+      label: '매우 좋음',
+      headline: '월 수익률 기준으로 매우 좋은 매물입니다',
+      message: `월 수익률 ${formatPercent(monthlyCashYieldPercent)}로 목표 기준을 충분히 넘습니다.`,
+      action: '가격보다 인허가·소방·공사비 리스크를 우선 실사하세요.',
       gapManwon,
     }
   }

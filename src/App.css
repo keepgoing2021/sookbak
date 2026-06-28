@@ -490,13 +490,20 @@ h1 {
   word-break: keep-all;
 }
 
-.decision-card-reviewable {
+.decision-card-reviewable,
+.decision-card-excellent {
   border-color: #a7f3d0;
   background: linear-gradient(180deg, #ecfdf5, #ffffff);
 }
 
-.decision-card-reviewable strong {
+.decision-card-reviewable strong,
+.decision-card-excellent strong {
   background: #059669;
+}
+
+.decision-card-excellent h3,
+.decision-card-excellent p {
+  color: #047857;
 }
 
 .decision-card-needs-adjustment {
