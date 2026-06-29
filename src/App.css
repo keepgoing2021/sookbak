@@ -1608,8 +1608,8 @@ h1 {
   grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
   grid-template-areas:
     "investment loan"
-    "exit guidance"
-    ". detail";
+    "guidance detail"
+    "exit .";
   align-items: start;
 }
 
