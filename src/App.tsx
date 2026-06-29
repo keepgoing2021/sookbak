@@ -1354,7 +1354,7 @@ function DirectResultPanel({
             <span className="section-index">2-1</span>
             <h2>매입 판단</h2>
           </div>
-          <DecisionCard decision={decision} />
+          <DecisionCard decision={decision} monthlyCashYieldPercent={result.monthlyCashYieldPercent} />
           <div className="guidance-grid">
             <NetTargetComparison result={result} />
             <RecommendedPurchasePriceCard
@@ -1434,18 +1434,31 @@ function DirectResultPanel({
 
 function DecisionCard({
   decision,
+  monthlyCashYieldPercent,
 }: {
   decision: ReturnType<typeof calculatePurchaseDecision>
+  monthlyCashYieldPercent: number | null
 }) {
+  const shortStatusCopy = {
+    excellent: '목표 크게 초과',
+    reviewable: '기준 통과',
+    'needs-adjustment': '가격·수익 조정 필요',
+    expensive: '보수적 보류',
+    empty: '입력 대기',
+  }[decision.status]
+
   return (
     <article className={`decision-card decision-card-${decision.status}`}>
       <div>
-        <span>판단 결과</span>
+        <span>판단</span>
         <strong>{decision.label}</strong>
-        <h3>{decision.headline}</h3>
-        <p>{decision.message}</p>
       </div>
-      <small>{decision.action}</small>
+      <div className="decision-main-metric">
+        <span>월 수익률</span>
+        <b>{formatPercent(monthlyCashYieldPercent)}</b>
+        <p>{shortStatusCopy}</p>
+      </div>
+      <small>실사: 인허가 · 소방 · 공사비</small>
     </article>
   )
 }
@@ -1456,24 +1469,19 @@ function NetTargetComparison({ result }: { result: ReturnType<typeof calculateIn
   return (
     <article className="net-comparison-card">
       <div className="comparison-copy">
-        <span>필요 월순수익 vs 예상 월순수익</span>
-        <strong>
-          이 매물을 사려면 월순수익이 최소 {formatManwon(result.targetMonthlyNetManwon)}은 나와야 합니다.
-        </strong>
+        <span>월순수익</span>
+        <strong>{formatManwon(result.monthlyNetManwon)}</strong>
+        <p>필요 기준보다 {formatManwon(Math.abs(result.targetMonthlyNetGapManwon))} {gapLabel}</p>
       </div>
       <dl>
         <div>
-          <dt>필요한 월순수익</dt>
+          <dt>필요</dt>
           <dd>{formatManwon(result.targetMonthlyNetManwon)}</dd>
-        </div>
-        <div>
-          <dt>현재 예상 월순수익</dt>
-          <dd>{formatManwon(result.monthlyNetManwon)}</dd>
         </div>
         <div className={result.targetMonthlyNetGapManwon >= 0 ? 'positive' : 'negative'}>
           <dt>차이</dt>
           <dd>
-            {formatManwonSigned(result.targetMonthlyNetGapManwon)} {gapLabel}
+            {formatManwonSigned(result.targetMonthlyNetGapManwon)}
           </dd>
         </div>
       </dl>
@@ -1490,19 +1498,19 @@ function RecommendedPurchasePriceCard({
 }) {
   const hasRecommendation = recommendedPurchasePriceEok !== null && purchasePriceGapEok !== null
   const gapCopy = !hasRecommendation
-    ? '월순수익을 입력하면 역산됩니다.'
+    ? '월순수익 입력 후 계산'
     : purchasePriceGapEok >= 0
-      ? `현재 매입가는 권장 상한보다 ${formatEok(purchasePriceGapEok)} 낮습니다.`
-      : `현재 매입가를 약 ${formatEok(Math.abs(purchasePriceGapEok))} 낮춰야 합니다.`
+      ? `현재가보다 ${formatEok(purchasePriceGapEok)} 여유`
+      : `약 ${formatEok(Math.abs(purchasePriceGapEok))} 낮춰야 함`
 
   return (
     <article className="recommended-price-card">
       <div>
-        <span>이 수익이면 얼마에 사야 할까?</span>
+        <span>권장 매입가</span>
         <strong>{hasRecommendation ? formatEok(recommendedPurchasePriceEok) : '-'}</strong>
         <p>{gapCopy}</p>
       </div>
-      <small>현재 월순수익이 목표 기준을 맞추는 매입가 상한입니다.</small>
+      <small>목표 수익률 기준 상한</small>
     </article>
   )
 }
