@@ -348,9 +348,6 @@ function DirectPurchaseCalculator({
             </details>
           </div>
 
-          <div className="deferred-exit-panel">
-            <ExitEstimatePanel hasPurchasePrice={hasPurchasePrice} result={result} />
-          </div>
         </section>
 
         <section className="right-column direct-right-column">
@@ -404,16 +401,16 @@ function DirectPurchaseCalculator({
               help="운영비 차감 후 순매출"
             />
           </div>
-
-          <DirectResultPanel
-            hasPurchasePrice={hasPurchasePrice}
-            result={result}
-            propertyType={propertyType}
-            ltvPercent={ltvPercent}
-            otherCostEok={toNumber(values.otherCostEok)}
-          />
         </section>
       </div>
+
+      <DirectResultPanel
+        hasPurchasePrice={hasPurchasePrice}
+        result={result}
+        propertyType={propertyType}
+        ltvPercent={ltvPercent}
+        otherCostEok={toNumber(values.otherCostEok)}
+      />
 
       <aside className="notice">
         <strong>읽는 법</strong>
@@ -1350,21 +1347,25 @@ function DirectResultPanel({
     : recommendedPurchasePriceEok - (result.totalInvestmentEok - result.sideCostsEok)
 
   return (
-    <>
-      <section className="result-panel result-panel-guidance" aria-live="polite">
-        <div className="result-section-heading">
-          <span className="section-index">2-1</span>
-          <h2>매입 판단</h2>
-        </div>
-        <DecisionCard decision={decision} />
-        <div className="guidance-grid">
-          <NetTargetComparison result={result} />
-          <RecommendedPurchasePriceCard
-            recommendedPurchasePriceEok={recommendedPurchasePriceEok}
-            purchasePriceGapEok={purchasePriceGapEok}
-          />
-        </div>
-      </section>
+    <div className="direct-results-board">
+      <div className="direct-results-left">
+        <section className="result-panel result-panel-guidance" aria-live="polite">
+          <div className="result-section-heading">
+            <span className="section-index">2-1</span>
+            <h2>매입 판단</h2>
+          </div>
+          <DecisionCard decision={decision} />
+          <div className="guidance-grid">
+            <NetTargetComparison result={result} />
+            <RecommendedPurchasePriceCard
+              recommendedPurchasePriceEok={recommendedPurchasePriceEok}
+              purchasePriceGapEok={purchasePriceGapEok}
+            />
+          </div>
+        </section>
+
+        <ExitEstimatePanel hasPurchasePrice={hasPurchasePrice} result={result} />
+      </div>
 
       <section className="result-panel result-panel-detail" aria-live="polite">
         <div className="result-section-heading compact">
@@ -1427,7 +1428,7 @@ function DirectResultPanel({
           </article>
         </div>
       </section>
-    </>
+    </div>
   )
 }
 
