@@ -19,7 +19,7 @@ describe('direct purchase calculator', () => {
   it('uses the requested editable default financing assumptions', () => {
     expect(DEFAULT_LTV_PERCENT).toBe(80)
     expect(DEFAULT_ANNUAL_INTEREST_RATE).toBe(5)
-    expect(DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE).toBe(2.1)
+    expect(DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE).toBe(2.55)
   })
 
   it('auto-calculates default fees from purchase price', () => {
@@ -92,7 +92,7 @@ describe('direct purchase calculator', () => {
       loanAmountEok: 32,
       annualInterestRate: 5,
       tourismLoanAmountEok: 0,
-      tourismLoanAnnualInterestRate: 2.1,
+      tourismLoanAnnualInterestRate: DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE,
       monthlyRevenueManwon: 5833,
     })
 
@@ -113,7 +113,7 @@ describe('direct purchase calculator', () => {
       loanAmountEok: 32,
       annualInterestRate: 5,
       tourismLoanAmountEok: 0,
-      tourismLoanAnnualInterestRate: 2.1,
+      tourismLoanAnnualInterestRate: DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE,
       monthlyRevenueManwon: 5833,
     })
 
