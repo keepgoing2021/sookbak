@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties, type Dispatch, type SetStateAction } from 'react'
 import './App.css'
 import {
   type PropertyType,
@@ -1439,6 +1439,8 @@ function DecisionCard({
   decision: ReturnType<typeof calculatePurchaseDecision>
   monthlyCashYieldPercent: number | null
 }) {
+  const gaugeValue = monthlyCashYieldPercent === null ? 0 : Math.max(0, Math.min(monthlyCashYieldPercent, 5))
+  const gaugeProgress = (gaugeValue / 5) * 100
   const shortStatusCopy = {
     excellent: '목표 크게 초과',
     reviewable: '기준 통과',
@@ -1448,17 +1450,22 @@ function DecisionCard({
   }[decision.status]
 
   return (
-    <article className={`decision-card decision-card-${decision.status}`}>
-      <div>
-        <span>판단</span>
-        <strong>{decision.label}</strong>
+    <article
+      className={`decision-card decision-card-${decision.status}`}
+      style={{ '--decision-progress': `${gaugeProgress}%` } as CSSProperties}
+    >
+      <div className="decision-gauge" aria-label={`월 수익률 ${formatPercent(monthlyCashYieldPercent)}`}>
+        <div className="decision-gauge-inner">
+          <span>ROI</span>
+          <b>{formatPercent(monthlyCashYieldPercent)}</b>
+        </div>
       </div>
       <div className="decision-main-metric">
-        <span>월 수익률</span>
-        <b>{formatPercent(monthlyCashYieldPercent)}</b>
+        <span>매입 판단</span>
+        <strong>{decision.label}</strong>
         <p>{shortStatusCopy}</p>
       </div>
-      <small>실사: 인허가 · 소방 · 공사비</small>
+      <small>인허가 · 소방 · 공사비 우선 실사</small>
     </article>
   )
 }
