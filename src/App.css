@@ -1081,6 +1081,20 @@ h1 {
   box-shadow: 0 0 0 3px rgba(28, 102, 255, 0.16);
 }
 
+.scenario-mini-input input[readonly] {
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.scenario-mini-input small {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.35;
+  word-break: keep-all;
+}
+
 .scenario-mini-input em {
   position: absolute;
   right: 10px;
