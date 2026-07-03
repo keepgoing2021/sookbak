@@ -16,6 +16,7 @@ export interface RecommendedPurchasePriceInput {
   monthlyNetManwon: number
   ltvPercent: number
   otherCostEok: number
+  targetMonthlyNetManwonPerEok?: number
 }
 
 export interface CalculatorInput {
@@ -30,6 +31,9 @@ export interface CalculatorInput {
   tourismLoanAmountEok?: number
   tourismLoanAnnualInterestRate?: number
   monthlyRevenueManwon: number
+  targetMonthlyNetManwonPerEok?: number
+  exitBuyerLtvPercent?: number
+  exitMonthlyYieldPercent?: number
 }
 
 export interface CalculatorResult {
@@ -68,7 +72,7 @@ export const DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE = 2.55
 export const DEFAULT_EXIT_BUYER_LTV_PERCENT = 80
 export const DEFAULT_EXIT_MONTHLY_YIELD_PERCENT = 3
 
-const TARGET_MONTHLY_NET_MANWON_PER_EOK = 300
+export const DEFAULT_TARGET_MONTHLY_NET_MANWON_PER_EOK = 300
 
 export function toNumber(value: string): number {
   const normalized = value.replace(/,/g, '').trim()
@@ -80,8 +84,12 @@ export function toNumber(value: string): number {
 export function defaultAcquisitionTaxEok(
   propertyType: PropertyType,
   purchasePriceEok: number,
+  overrideRatePercent?: number,
 ): number {
-  return roundEok(purchasePriceEok * TAX_RATES[propertyType])
+  const rate = overrideRatePercent !== undefined && Number.isFinite(overrideRatePercent) && overrideRatePercent > 0
+    ? overrideRatePercent / 100
+    : TAX_RATES[propertyType]
+  return roundEok(purchasePriceEok * rate)
 }
 
 export function defaultLegalFeeEok(purchasePriceEok: number): number {
@@ -172,7 +180,7 @@ export function calculateRecommendedPurchasePriceEok(
 ): number | null {
   if (input.monthlyNetManwon <= 0 || input.ltvPercent >= 100) return null
 
-  const targetCashEok = input.monthlyNetManwon / TARGET_MONTHLY_NET_MANWON_PER_EOK
+  const targetCashEok = input.monthlyNetManwon / normalizePositive(input.targetMonthlyNetManwonPerEok, DEFAULT_TARGET_MONTHLY_NET_MANWON_PER_EOK)
   let low = 0
   let high = Math.max(1, targetCashEok / Math.max(0.01, 1 - input.ltvPercent / 100))
 
@@ -221,7 +229,7 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
   )
   const monthlyNetManwon = roundManwon(input.monthlyRevenueManwon - totalMonthlyInterestManwon)
   const targetMonthlyNetManwon = roundManwon(
-    cashInvestedWithLoanEok * TARGET_MONTHLY_NET_MANWON_PER_EOK,
+    cashInvestedWithLoanEok * normalizePositive(input.targetMonthlyNetManwonPerEok, DEFAULT_TARGET_MONTHLY_NET_MANWON_PER_EOK),
   )
   const targetMonthlyNetGapManwon = roundManwon(monthlyNetManwon - targetMonthlyNetManwon)
   const annualNetManwon = roundManwon(monthlyNetManwon * 12)
@@ -233,11 +241,13 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
     ? roundPercent((monthlyNetManwon / (cashInvestedWithLoanEok * 10000)) * 100)
     : null
   const loanResilience = calculateLoanResilience(monthlyNetManwon, totalMonthlyInterestManwon)
+  const exitMonthlyYieldPercent = normalizePositive(input.exitMonthlyYieldPercent, DEFAULT_EXIT_MONTHLY_YIELD_PERCENT)
+  const exitBuyerLtvPercent = clamp(input.exitBuyerLtvPercent ?? DEFAULT_EXIT_BUYER_LTV_PERCENT, 0, 99.9)
   const exitBuyerRequiredCashEok = monthlyNetManwon > 0
-    ? roundEok(monthlyNetManwon / (DEFAULT_EXIT_MONTHLY_YIELD_PERCENT * 100))
+    ? roundEok(monthlyNetManwon / (exitMonthlyYieldPercent * 100))
     : null
   const exitEstimatedSalePriceEok = exitBuyerRequiredCashEok !== null
-    ? roundEok(exitBuyerRequiredCashEok / (1 - DEFAULT_EXIT_BUYER_LTV_PERCENT / 100))
+    ? roundEok(exitBuyerRequiredCashEok / (1 - exitBuyerLtvPercent / 100))
     : null
   const exitSalePriceGapEok = exitEstimatedSalePriceEok !== null
     ? roundEok(exitEstimatedSalePriceEok - input.purchasePriceEok)
@@ -338,6 +348,15 @@ export function formatPercent(value: number | null): string {
 
 function roundEok(value: number): number {
   return Math.round(value * 1000) / 1000
+}
+
+function normalizePositive(value: number | undefined, fallback: number): number {
+  return value !== undefined && Number.isFinite(value) && value > 0 ? value : fallback
+}
+
+function clamp(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) return min
+  return Math.min(max, Math.max(min, value))
 }
 
 function roundManwon(value: number): number {

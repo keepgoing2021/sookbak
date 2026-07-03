@@ -7,6 +7,7 @@ import {
   DEFAULT_EXIT_BUYER_LTV_PERCENT,
   DEFAULT_EXIT_MONTHLY_YIELD_PERCENT,
   DEFAULT_LTV_PERCENT,
+  DEFAULT_TARGET_MONTHLY_NET_MANWON_PER_EOK,
   DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE,
   defaultAcquisitionTaxEok,
   defaultBrokerageFeeEok,
@@ -22,8 +23,9 @@ describe('direct purchase calculator', () => {
     expect(DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE).toBe(2.55)
   })
 
-  it('auto-calculates default fees from purchase price', () => {
+  it('auto-calculates default fees from purchase price and supports acquisition tax override', () => {
     expect(defaultAcquisitionTaxEok('commercial', 12)).toBe(0.552)
+    expect(defaultAcquisitionTaxEok('commercial', 12, 9.4)).toBe(1.128)
     expect(defaultLegalFeeEok(12)).toBe(0.018)
     expect(defaultBrokerageFeeEok(12)).toBe(0.108)
     expect(defaultLoanAmountEok(12)).toBe(9.6)
@@ -147,6 +149,8 @@ describe('direct purchase calculator', () => {
   })
 
   it('uses cash invested after LTV loan as the monthly net target base', () => {
+    expect(DEFAULT_TARGET_MONTHLY_NET_MANWON_PER_EOK).toBe(300)
+
     const result = calculateInvestment({
       propertyType: 'commercial',
       purchasePriceEok: 40,
@@ -164,6 +168,30 @@ describe('direct purchase calculator', () => {
     expect(result.totalInvestmentEok).toBe(42.26)
     expect(result.cashInvestedWithLoanEok).toBe(10.26)
     expect(result.targetMonthlyNetManwon).toBe(3078)
+  })
+
+  it('lets users override target return and exit assumptions', () => {
+    const result = calculateInvestment({
+      propertyType: 'commercial',
+      purchasePriceEok: 40,
+      acquisitionTaxEok: 1.84,
+      legalFeeEok: 0.06,
+      brokerageFeeEok: 0.36,
+      otherCostEok: 0,
+      loanAmountEok: 32,
+      annualInterestRate: 5,
+      tourismLoanAmountEok: 0,
+      tourismLoanAnnualInterestRate: 0,
+      monthlyRevenueManwon: 5833,
+      targetMonthlyNetManwonPerEok: 200,
+      exitBuyerLtvPercent: 70,
+      exitMonthlyYieldPercent: 2,
+    })
+
+    expect(result.cashInvestedWithLoanEok).toBe(10.26)
+    expect(result.targetMonthlyNetManwon).toBe(2052)
+    expect(result.exitBuyerRequiredCashEok).toBe(22.5)
+    expect(result.exitEstimatedSalePriceEok).toBe(75)
   })
 
   it('classifies purchase decision from expected monthly net versus required monthly net', () => {

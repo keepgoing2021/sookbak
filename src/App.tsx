@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties, type Dispatch, type SetStateAction } from 'react'
+import { useMemo, useState, type CSSProperties, type Dispatch, type SetStateAction } from 'react'
 import './App.css'
 import {
   type PropertyType,
@@ -6,6 +6,7 @@ import {
   DEFAULT_EXIT_BUYER_LTV_PERCENT,
   DEFAULT_EXIT_MONTHLY_YIELD_PERCENT,
   DEFAULT_LTV_PERCENT,
+  DEFAULT_TARGET_MONTHLY_NET_MANWON_PER_EOK,
   DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE,
   calculateInvestment,
   calculatePurchaseDecision,
@@ -60,6 +61,10 @@ type Values = {
   tourismLoanAmountEok: string
   tourismLoanAnnualInterestRate: string
   monthlyRevenueManwon: string
+  acquisitionTaxRatePercent: string
+  targetMonthlyNetManwonPerEok: string
+  exitBuyerLtvPercent: string
+  exitMonthlyYieldPercent: string
 }
 
 type AutoFieldKey = 'acquisitionTaxEok' | 'legalFeeEok' | 'brokerageFeeEok'
@@ -71,6 +76,10 @@ type FreeFieldKey =
   | 'tourismLoanAmountEok'
   | 'tourismLoanAnnualInterestRate'
   | 'monthlyRevenueManwon'
+  | 'acquisitionTaxRatePercent'
+  | 'targetMonthlyNetManwonPerEok'
+  | 'exitBuyerLtvPercent'
+  | 'exitMonthlyYieldPercent'
 
 const propertyTypes: Array<{ key: PropertyType; label: string; description: string }> = [
   { key: 'commercial', label: '상가/오피스텔', description: '업무·상업용 기준' },
@@ -90,6 +99,10 @@ const initialValues: Values = {
   tourismLoanAmountEok: '',
   tourismLoanAnnualInterestRate: String(DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE),
   monthlyRevenueManwon: '',
+  acquisitionTaxRatePercent: '',
+  targetMonthlyNetManwonPerEok: String(DEFAULT_TARGET_MONTHLY_NET_MANWON_PER_EOK),
+  exitBuyerLtvPercent: String(DEFAULT_EXIT_BUYER_LTV_PERCENT),
+  exitMonthlyYieldPercent: String(DEFAULT_EXIT_MONTHLY_YIELD_PERCENT),
 }
 
 const tabs: Array<{ key: CalculatorTab; label: string; eyebrow: string }> = [
@@ -177,11 +190,15 @@ function DirectPurchaseCalculator({
       return { acquisitionTaxEok: '', legalFeeEok: '', brokerageFeeEok: '' }
     }
     return {
-      acquisitionTaxEok: stringify(defaultAcquisitionTaxEok(propertyType, purchasePriceEok)),
+      acquisitionTaxEok: stringify(defaultAcquisitionTaxEok(
+        propertyType,
+        purchasePriceEok,
+        toNumber(values.acquisitionTaxRatePercent) || undefined,
+      )),
       legalFeeEok: stringify(defaultLegalFeeEok(purchasePriceEok)),
       brokerageFeeEok: stringify(defaultBrokerageFeeEok(purchasePriceEok)),
     }
-  }, [propertyType, purchasePriceEok, hasPurchasePrice])
+  }, [propertyType, purchasePriceEok, hasPurchasePrice, values.acquisitionTaxRatePercent])
 
   const effective = {
     acquisitionTaxEok: values.acquisitionTaxEok ?? autoDefaults.acquisitionTaxEok,
@@ -189,7 +206,8 @@ function DirectPurchaseCalculator({
     brokerageFeeEok: values.brokerageFeeEok ?? autoDefaults.brokerageFeeEok,
   }
 
-  const acquisitionTaxLabel = propertyType === 'housing' ? '취득세 (1.1%)' : '취득세 (4.6%)'
+  const acquisitionTaxRatePercent = toNumber(values.acquisitionTaxRatePercent) || (propertyType === 'housing' ? 1.1 : 4.6)
+  const acquisitionTaxLabel = `취득세 (${formatPercent(acquisitionTaxRatePercent)})`
 
   const effectiveLoanAmountEok = values.loanAmountEok ||
     (hasPurchasePrice ? stringify(defaultLoanAmountEok(purchasePriceEok, ltvPercent)) : '')
@@ -207,6 +225,9 @@ function DirectPurchaseCalculator({
       tourismLoanAmountEok: toNumber(values.tourismLoanAmountEok),
       tourismLoanAnnualInterestRate: toNumber(values.tourismLoanAnnualInterestRate),
       monthlyRevenueManwon: toNumber(values.monthlyRevenueManwon),
+      targetMonthlyNetManwonPerEok: toNumber(values.targetMonthlyNetManwonPerEok),
+      exitBuyerLtvPercent: toNumber(values.exitBuyerLtvPercent),
+      exitMonthlyYieldPercent: toNumber(values.exitMonthlyYieldPercent),
     }),
     [
       propertyType,
@@ -220,6 +241,9 @@ function DirectPurchaseCalculator({
       values.tourismLoanAmountEok,
       values.tourismLoanAnnualInterestRate,
       values.monthlyRevenueManwon,
+      values.targetMonthlyNetManwonPerEok,
+      values.exitBuyerLtvPercent,
+      values.exitMonthlyYieldPercent,
     ],
   )
 
@@ -298,6 +322,21 @@ function DirectPurchaseCalculator({
                 </button>
               ))}
             </div>
+
+            <label className={`risk-toggle ${values.acquisitionTaxRatePercent === '9.4' ? 'on' : ''}`}>
+              <input
+                type="checkbox"
+                checked={values.acquisitionTaxRatePercent === '9.4'}
+                onChange={(event) => {
+                  setValues((current) => ({
+                    ...current,
+                    acquisitionTaxRatePercent: event.target.checked ? '9.4' : '',
+                    acquisitionTaxEok: null,
+                  }))
+                }}
+              />
+              <span>과밀억제권역·5년 미만 법인 등 취득세 중과 9.4% 적용</span>
+            </label>
 
             <div className="primary-input-block">
               <MoneyInput
@@ -394,6 +433,30 @@ function DirectPurchaseCalculator({
               inputMode="decimal"
             />
             <MoneyInput
+              label="목표 월순수익"
+              unit="만원/억"
+              value={values.targetMonthlyNetManwonPerEok}
+              onChange={(value) => updateFree('targetMonthlyNetManwonPerEok', value)}
+              help="실투입금 1억당 필요한 월순수익"
+              inputMode="decimal"
+            />
+            <MoneyInput
+              label="엑싯 매수자 LTV"
+              unit="%"
+              value={values.exitBuyerLtvPercent}
+              onChange={(value) => updateFree('exitBuyerLtvPercent', value)}
+              help="엑싯 매도가 역산 가정"
+              inputMode="decimal"
+            />
+            <MoneyInput
+              label="엑싯 월수익률"
+              unit="%"
+              value={values.exitMonthlyYieldPercent}
+              onChange={(value) => updateFree('exitMonthlyYieldPercent', value)}
+              help="미래 매수자 자기자본 월수익률"
+              inputMode="decimal"
+            />
+            <MoneyInput
               label="월 매출 (에어비앤비)"
               unit="만원"
               value={values.monthlyRevenueManwon}
@@ -410,6 +473,9 @@ function DirectPurchaseCalculator({
         propertyType={propertyType}
         ltvPercent={ltvPercent}
         otherCostEok={toNumber(values.otherCostEok)}
+        targetMonthlyNetManwonPerEok={toNumber(values.targetMonthlyNetManwonPerEok)}
+        exitBuyerLtvPercent={toNumber(values.exitBuyerLtvPercent)}
+        exitMonthlyYieldPercent={toNumber(values.exitMonthlyYieldPercent)}
       />
 
       <aside className="notice">
@@ -427,9 +493,13 @@ function DirectPurchaseCalculator({
 function ExitEstimatePanel({
   hasPurchasePrice,
   result,
+  exitBuyerLtvPercent,
+  exitMonthlyYieldPercent,
 }: {
   hasPurchasePrice: boolean
   result: ReturnType<typeof calculateInvestment>
+  exitBuyerLtvPercent: number
+  exitMonthlyYieldPercent: number
 }) {
   const estimatedSalePrice = result.exitEstimatedSalePriceEok === null
     ? '-'
@@ -449,13 +519,13 @@ function ExitEstimatePanel({
       </div>
 
       <p className="exit-panel-copy">
-        미래 매수자가 LTV {DEFAULT_EXIT_BUYER_LTV_PERCENT}%를 일으키고, 실투입 에쿼티 기준 월 수익률 {DEFAULT_EXIT_MONTHLY_YIELD_PERCENT}%를 요구한다고 가정해요.
+        미래 매수자가 LTV {formatPercent(exitBuyerLtvPercent)}를 일으키고, 실투입 에쿼티 기준 월 수익률 {formatPercent(exitMonthlyYieldPercent)}를 요구한다고 가정해요.
       </p>
 
       <div className="exit-highlight">
         <span>예상 엑싯 매도가</span>
         <strong>{hasPurchasePrice ? estimatedSalePrice : '-'}</strong>
-        <p>월 순수익 ÷ {DEFAULT_EXIT_MONTHLY_YIELD_PERCENT}% ÷ 자기자본 {100 - DEFAULT_EXIT_BUYER_LTV_PERCENT}%</p>
+        <p>월 순수익 ÷ {formatPercent(exitMonthlyYieldPercent)} ÷ 자기자본 {formatPercent(100 - exitBuyerLtvPercent)}</p>
       </div>
 
       <dl className="exit-metrics">
@@ -867,11 +937,15 @@ function ScenarioMiniInput({
   unit,
   value,
   onChange,
+  readOnly = false,
+  help,
 }: {
   label: string
   unit: string
   value: string
   onChange: (value: string) => void
+  readOnly?: boolean
+  help?: string
 }) {
   return (
     <label className="scenario-mini-input">
@@ -880,10 +954,13 @@ function ScenarioMiniInput({
         <input
           inputMode="decimal"
           value={value}
+          readOnly={readOnly}
+          aria-readonly={readOnly}
           onChange={(event) => onChange(event.target.value)}
         />
         <em>{unit}</em>
       </div>
+      {help ? <small>{help}</small> : null}
     </label>
   )
 }
@@ -1038,10 +1115,6 @@ function ConstructionRiskSection({
     windowReduction: false,
   })
 
-  useEffect(() => {
-    setSourceMode(initialMode)
-  }, [initialMode])
-
   const rentalRoomCount = toNumber(rentalValues.roomCount)
   const syncedRoomCount = sourceMode === 'rental' && rentalRoomCount > 0
     ? rentalRoomCount
@@ -1051,7 +1124,11 @@ function ConstructionRiskSection({
   const directEffective = {
     acquisitionTaxEok:
       directValues.acquisitionTaxEok === null
-        ? defaultAcquisitionTaxEok(directPropertyType, directPurchasePrice)
+        ? defaultAcquisitionTaxEok(
+          directPropertyType,
+          directPurchasePrice,
+          toNumber(directValues.acquisitionTaxRatePercent) || undefined,
+        )
         : toNumber(directValues.acquisitionTaxEok),
     legalFeeEok:
       directValues.legalFeeEok === null
@@ -1061,10 +1138,9 @@ function ConstructionRiskSection({
       directValues.brokerageFeeEok === null
         ? defaultBrokerageFeeEok(directPurchasePrice)
         : toNumber(directValues.brokerageFeeEok),
-    loanAmountEok:
-      directValues.loanAmountEok === null
-        ? defaultLoanAmountEok(directPurchasePrice, toNumber(directValues.ltvPercent))
-        : toNumber(directValues.loanAmountEok),
+    loanAmountEok: directValues.loanAmountEok.trim()
+      ? toNumber(directValues.loanAmountEok)
+      : defaultLoanAmountEok(directPurchasePrice, toNumber(directValues.ltvPercent)),
   }
   const directResult = calculateInvestment({
     propertyType: directPropertyType,
@@ -1078,6 +1154,9 @@ function ConstructionRiskSection({
     tourismLoanAmountEok: toNumber(directValues.tourismLoanAmountEok),
     tourismLoanAnnualInterestRate: toNumber(directValues.tourismLoanAnnualInterestRate),
     monthlyRevenueManwon: toNumber(directValues.monthlyRevenueManwon),
+    targetMonthlyNetManwonPerEok: toNumber(directValues.targetMonthlyNetManwonPerEok),
+    exitBuyerLtvPercent: toNumber(directValues.exitBuyerLtvPercent),
+    exitMonthlyYieldPercent: toNumber(directValues.exitMonthlyYieldPercent),
   })
 
   const rentalInput: RentalCalculatorInput = {
@@ -1099,18 +1178,15 @@ function ConstructionRiskSection({
   }
   const rentalResult = calculateRental(rentalInput)
 
-  const checklistInput: ConstructionChecklistInput = useMemo(
-    () => ({
-      roomCount: syncedRoomCount,
-      bathroomCount: toNumber(form.bathroomCount),
-      fireWindowLikely: form.fireWindowLikely,
-      masonryTub: form.masonryTub,
-      windowReduction: form.windowReduction,
-    }),
-    [form, syncedRoomCount],
-  )
+  const checklistInput: ConstructionChecklistInput = {
+    roomCount: syncedRoomCount,
+    bathroomCount: toNumber(form.bathroomCount),
+    fireWindowLikely: form.fireWindowLikely,
+    masonryTub: form.masonryTub,
+    windowReduction: form.windowReduction,
+  }
 
-  const checklist = useMemo(() => buildConstructionChecklist(checklistInput), [checklistInput])
+  const checklist = buildConstructionChecklist(checklistInput)
   const sourceLabel = sourceMode === 'direct' ? '직접매입 데이터' : '임대 데이터'
 
   return (
@@ -1179,7 +1255,12 @@ function ConstructionRiskSection({
           label={sourceMode === 'rental' && rentalRoomCount > 0 ? '방 개수 · 임대 입력 연동' : '방 개수'}
           unit="개"
           value={sourceMode === 'rental' && rentalRoomCount > 0 ? String(rentalRoomCount) : form.roomCount}
-          onChange={(value) => setForm((prev) => ({ ...prev, roomCount: value }))}
+          onChange={(value) => {
+            if (sourceMode === 'rental' && rentalRoomCount > 0) return
+            setForm((prev) => ({ ...prev, roomCount: value }))
+          }}
+          readOnly={sourceMode === 'rental' && rentalRoomCount > 0}
+          help={sourceMode === 'rental' && rentalRoomCount > 0 ? '임대 탭 방 개수를 따라갑니다.' : undefined}
         />
         <ScenarioMiniInput
           label="화장실 개수"
@@ -1315,12 +1396,18 @@ function DirectResultPanel({
   propertyType,
   ltvPercent,
   otherCostEok,
+  targetMonthlyNetManwonPerEok,
+  exitBuyerLtvPercent,
+  exitMonthlyYieldPercent,
 }: {
   hasPurchasePrice: boolean
   result: ReturnType<typeof calculateInvestment>
   propertyType: PropertyType
   ltvPercent: number
   otherCostEok: number
+  targetMonthlyNetManwonPerEok: number
+  exitBuyerLtvPercent: number
+  exitMonthlyYieldPercent: number
 }) {
   if (!hasPurchasePrice) {
     return (
@@ -1341,6 +1428,7 @@ function DirectResultPanel({
     monthlyNetManwon: result.monthlyNetManwon,
     ltvPercent,
     otherCostEok,
+    targetMonthlyNetManwonPerEok,
   })
   const purchasePriceGapEok = recommendedPurchasePriceEok === null
     ? null
@@ -1364,7 +1452,12 @@ function DirectResultPanel({
           </div>
         </section>
 
-        <ExitEstimatePanel hasPurchasePrice={hasPurchasePrice} result={result} />
+        <ExitEstimatePanel
+          hasPurchasePrice={hasPurchasePrice}
+          result={result}
+          exitBuyerLtvPercent={exitBuyerLtvPercent}
+          exitMonthlyYieldPercent={exitMonthlyYieldPercent}
+        />
       </div>
 
       <section className="result-panel result-panel-detail" aria-live="polite">
