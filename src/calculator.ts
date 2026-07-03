@@ -30,7 +30,6 @@ export interface CalculatorInput {
   tourismLoanAmountEok?: number
   tourismLoanAnnualInterestRate?: number
   monthlyRevenueManwon: number
-  targetMonthlyNetManwon?: number
 }
 
 export interface CalculatorResult {
@@ -225,12 +224,8 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
     monthlyInterestManwon + tourismLoanMonthlyInterestManwon,
   )
   const monthlyNetManwon = roundManwon(input.monthlyRevenueManwon - totalMonthlyInterestManwon)
-  const autoTargetMonthlyNetManwon = roundManwon(
+  const targetMonthlyNetManwon = roundManwon(
     cashInvestedWithLoanEok * DEFAULT_TARGET_MONTHLY_NET_MANWON_PER_EOK,
-  )
-  const targetMonthlyNetManwon = normalizePositive(
-    input.targetMonthlyNetManwon,
-    autoTargetMonthlyNetManwon,
   )
   const targetMonthlyNetGapManwon = roundManwon(monthlyNetManwon - targetMonthlyNetManwon)
   const annualNetManwon = roundManwon(monthlyNetManwon * 12)
@@ -347,10 +342,6 @@ export function formatPercent(value: number | null): string {
 
 function roundEok(value: number): number {
   return Math.round(value * 1000) / 1000
-}
-
-function normalizePositive(value: number | undefined, fallback: number): number {
-  return value !== undefined && Number.isFinite(value) && value > 0 ? value : fallback
 }
 
 

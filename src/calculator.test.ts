@@ -170,29 +170,6 @@ describe('direct purchase calculator', () => {
     expect(result.targetMonthlyNetManwon).toBe(3078)
   })
 
-  it('lets users override the target monthly net as an absolute manwon amount', () => {
-    const result = calculateInvestment({
-      propertyType: 'commercial',
-      purchasePriceEok: 40,
-      acquisitionTaxEok: 1.84,
-      legalFeeEok: 0.06,
-      brokerageFeeEok: 0.36,
-      otherCostEok: 0,
-      loanAmountEok: 32,
-      annualInterestRate: 5,
-      tourismLoanAmountEok: 0,
-      tourismLoanAnnualInterestRate: 0,
-      monthlyRevenueManwon: 5833,
-      targetMonthlyNetManwon: 2500,
-    })
-
-    expect(result.cashInvestedWithLoanEok).toBe(10.26)
-    expect(result.targetMonthlyNetManwon).toBe(2500)
-    expect(result.targetMonthlyNetGapManwon).toBe(2000)
-    expect(result.exitBuyerRequiredCashEok).toBe(15)
-    expect(result.exitEstimatedSalePriceEok).toBe(75)
-  })
-
   it('classifies purchase decision from expected monthly net versus required monthly net', () => {
     expect(calculatePurchaseDecision(1832, 1154, 4.76)).toMatchObject({
       status: 'excellent',

@@ -60,7 +60,6 @@ type Values = {
   tourismLoanAnnualInterestRate: string
   monthlyRevenueManwon: string
   acquisitionTaxRatePercent: string
-  targetMonthlyNetManwon: string
 }
 
 type AutoFieldKey = 'acquisitionTaxEok' | 'legalFeeEok' | 'brokerageFeeEok'
@@ -73,7 +72,6 @@ type FreeFieldKey =
   | 'tourismLoanAnnualInterestRate'
   | 'monthlyRevenueManwon'
   | 'acquisitionTaxRatePercent'
-  | 'targetMonthlyNetManwon'
 
 const propertyTypes: Array<{ key: PropertyType; label: string; description: string }> = [
   { key: 'commercial', label: '상가/오피스텔', description: '업무·상업용 기준' },
@@ -94,7 +92,6 @@ const initialValues: Values = {
   tourismLoanAnnualInterestRate: String(DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE),
   monthlyRevenueManwon: '',
   acquisitionTaxRatePercent: '',
-  targetMonthlyNetManwon: '',
 }
 
 const tabs: Array<{ key: CalculatorTab; label: string; eyebrow: string }> = [
@@ -217,7 +214,6 @@ function DirectPurchaseCalculator({
       tourismLoanAmountEok: toNumber(values.tourismLoanAmountEok),
       tourismLoanAnnualInterestRate: toNumber(values.tourismLoanAnnualInterestRate),
       monthlyRevenueManwon: toNumber(values.monthlyRevenueManwon),
-      targetMonthlyNetManwon: toNumber(values.targetMonthlyNetManwon),
     }),
     [
       propertyType,
@@ -231,7 +227,6 @@ function DirectPurchaseCalculator({
       values.tourismLoanAmountEok,
       values.tourismLoanAnnualInterestRate,
       values.monthlyRevenueManwon,
-      values.targetMonthlyNetManwon,
     ],
   )
 
@@ -418,15 +413,6 @@ function DirectPurchaseCalculator({
               value={values.tourismLoanAnnualInterestRate}
               onChange={(value) => updateFree('tourismLoanAnnualInterestRate', value)}
               help="관광기금 별도 금리"
-              inputMode="decimal"
-            />
-            <MoneyInput
-              label="목표 월순수익"
-              unit="만원"
-              value={values.targetMonthlyNetManwon}
-              placeholder={String(Math.round(result.targetMonthlyNetManwon))}
-              onChange={(value) => updateFree('targetMonthlyNetManwon', value)}
-              help="비워두면 실투입금 기준 자동 계산"
               inputMode="decimal"
             />
             <MoneyInput
@@ -1120,7 +1106,6 @@ function ConstructionRiskSection({
     tourismLoanAmountEok: toNumber(directValues.tourismLoanAmountEok),
     tourismLoanAnnualInterestRate: toNumber(directValues.tourismLoanAnnualInterestRate),
     monthlyRevenueManwon: toNumber(directValues.monthlyRevenueManwon),
-    targetMonthlyNetManwon: toNumber(directValues.targetMonthlyNetManwon),
   })
 
   const rentalInput: RentalCalculatorInput = {
