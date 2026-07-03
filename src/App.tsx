@@ -63,8 +63,6 @@ type Values = {
   monthlyRevenueManwon: string
   acquisitionTaxRatePercent: string
   targetMonthlyNetManwonPerEok: string
-  exitBuyerLtvPercent: string
-  exitMonthlyYieldPercent: string
 }
 
 type AutoFieldKey = 'acquisitionTaxEok' | 'legalFeeEok' | 'brokerageFeeEok'
@@ -78,8 +76,6 @@ type FreeFieldKey =
   | 'monthlyRevenueManwon'
   | 'acquisitionTaxRatePercent'
   | 'targetMonthlyNetManwonPerEok'
-  | 'exitBuyerLtvPercent'
-  | 'exitMonthlyYieldPercent'
 
 const propertyTypes: Array<{ key: PropertyType; label: string; description: string }> = [
   { key: 'commercial', label: '상가/오피스텔', description: '업무·상업용 기준' },
@@ -101,8 +97,6 @@ const initialValues: Values = {
   monthlyRevenueManwon: '',
   acquisitionTaxRatePercent: '',
   targetMonthlyNetManwonPerEok: String(DEFAULT_TARGET_MONTHLY_NET_MANWON_PER_EOK),
-  exitBuyerLtvPercent: String(DEFAULT_EXIT_BUYER_LTV_PERCENT),
-  exitMonthlyYieldPercent: String(DEFAULT_EXIT_MONTHLY_YIELD_PERCENT),
 }
 
 const tabs: Array<{ key: CalculatorTab; label: string; eyebrow: string }> = [
@@ -226,8 +220,6 @@ function DirectPurchaseCalculator({
       tourismLoanAnnualInterestRate: toNumber(values.tourismLoanAnnualInterestRate),
       monthlyRevenueManwon: toNumber(values.monthlyRevenueManwon),
       targetMonthlyNetManwonPerEok: toNumber(values.targetMonthlyNetManwonPerEok),
-      exitBuyerLtvPercent: toNumber(values.exitBuyerLtvPercent),
-      exitMonthlyYieldPercent: toNumber(values.exitMonthlyYieldPercent),
     }),
     [
       propertyType,
@@ -242,8 +234,6 @@ function DirectPurchaseCalculator({
       values.tourismLoanAnnualInterestRate,
       values.monthlyRevenueManwon,
       values.targetMonthlyNetManwonPerEok,
-      values.exitBuyerLtvPercent,
-      values.exitMonthlyYieldPercent,
     ],
   )
 
@@ -441,22 +431,6 @@ function DirectPurchaseCalculator({
               inputMode="decimal"
             />
             <MoneyInput
-              label="엑싯 매수자 LTV"
-              unit="%"
-              value={values.exitBuyerLtvPercent}
-              onChange={(value) => updateFree('exitBuyerLtvPercent', value)}
-              help="엑싯 매도가 역산 가정"
-              inputMode="decimal"
-            />
-            <MoneyInput
-              label="엑싯 월수익률"
-              unit="%"
-              value={values.exitMonthlyYieldPercent}
-              onChange={(value) => updateFree('exitMonthlyYieldPercent', value)}
-              help="미래 매수자 자기자본 월수익률"
-              inputMode="decimal"
-            />
-            <MoneyInput
               label="월 매출 (에어비앤비)"
               unit="만원"
               value={values.monthlyRevenueManwon}
@@ -474,8 +448,6 @@ function DirectPurchaseCalculator({
         ltvPercent={ltvPercent}
         otherCostEok={toNumber(values.otherCostEok)}
         targetMonthlyNetManwonPerEok={toNumber(values.targetMonthlyNetManwonPerEok)}
-        exitBuyerLtvPercent={toNumber(values.exitBuyerLtvPercent)}
-        exitMonthlyYieldPercent={toNumber(values.exitMonthlyYieldPercent)}
       />
 
       <aside className="notice">
@@ -493,13 +465,9 @@ function DirectPurchaseCalculator({
 function ExitEstimatePanel({
   hasPurchasePrice,
   result,
-  exitBuyerLtvPercent,
-  exitMonthlyYieldPercent,
 }: {
   hasPurchasePrice: boolean
   result: ReturnType<typeof calculateInvestment>
-  exitBuyerLtvPercent: number
-  exitMonthlyYieldPercent: number
 }) {
   const estimatedSalePrice = result.exitEstimatedSalePriceEok === null
     ? '-'
@@ -519,13 +487,13 @@ function ExitEstimatePanel({
       </div>
 
       <p className="exit-panel-copy">
-        미래 매수자가 LTV {formatPercent(exitBuyerLtvPercent)}를 일으키고, 실투입 에쿼티 기준 월 수익률 {formatPercent(exitMonthlyYieldPercent)}를 요구한다고 가정해요.
+        미래 매수자가 LTV {DEFAULT_EXIT_BUYER_LTV_PERCENT}%를 일으키고, 실투입 에쿼티 기준 월 수익률 {DEFAULT_EXIT_MONTHLY_YIELD_PERCENT}%를 요구한다고 가정해요.
       </p>
 
       <div className="exit-highlight">
         <span>예상 엑싯 매도가</span>
         <strong>{hasPurchasePrice ? estimatedSalePrice : '-'}</strong>
-        <p>월 순수익 ÷ {formatPercent(exitMonthlyYieldPercent)} ÷ 자기자본 {formatPercent(100 - exitBuyerLtvPercent)}</p>
+        <p>월 순수익 ÷ {DEFAULT_EXIT_MONTHLY_YIELD_PERCENT}% ÷ 자기자본 {100 - DEFAULT_EXIT_BUYER_LTV_PERCENT}%</p>
       </div>
 
       <dl className="exit-metrics">
@@ -1155,8 +1123,6 @@ function ConstructionRiskSection({
     tourismLoanAnnualInterestRate: toNumber(directValues.tourismLoanAnnualInterestRate),
     monthlyRevenueManwon: toNumber(directValues.monthlyRevenueManwon),
     targetMonthlyNetManwonPerEok: toNumber(directValues.targetMonthlyNetManwonPerEok),
-    exitBuyerLtvPercent: toNumber(directValues.exitBuyerLtvPercent),
-    exitMonthlyYieldPercent: toNumber(directValues.exitMonthlyYieldPercent),
   })
 
   const rentalInput: RentalCalculatorInput = {
@@ -1397,8 +1363,6 @@ function DirectResultPanel({
   ltvPercent,
   otherCostEok,
   targetMonthlyNetManwonPerEok,
-  exitBuyerLtvPercent,
-  exitMonthlyYieldPercent,
 }: {
   hasPurchasePrice: boolean
   result: ReturnType<typeof calculateInvestment>
@@ -1406,8 +1370,6 @@ function DirectResultPanel({
   ltvPercent: number
   otherCostEok: number
   targetMonthlyNetManwonPerEok: number
-  exitBuyerLtvPercent: number
-  exitMonthlyYieldPercent: number
 }) {
   if (!hasPurchasePrice) {
     return (
@@ -1452,12 +1414,7 @@ function DirectResultPanel({
           </div>
         </section>
 
-        <ExitEstimatePanel
-          hasPurchasePrice={hasPurchasePrice}
-          result={result}
-          exitBuyerLtvPercent={exitBuyerLtvPercent}
-          exitMonthlyYieldPercent={exitMonthlyYieldPercent}
-        />
+<ExitEstimatePanel hasPurchasePrice={hasPurchasePrice} result={result} />
       </div>
 
       <section className="result-panel result-panel-detail" aria-live="polite">
