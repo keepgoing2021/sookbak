@@ -170,7 +170,7 @@ describe('direct purchase calculator', () => {
     expect(result.targetMonthlyNetManwon).toBe(3078)
   })
 
-  it('lets users override target return and exit assumptions', () => {
+  it('lets users override the target monthly net as an absolute manwon amount', () => {
     const result = calculateInvestment({
       propertyType: 'commercial',
       purchasePriceEok: 40,
@@ -183,14 +183,13 @@ describe('direct purchase calculator', () => {
       tourismLoanAmountEok: 0,
       tourismLoanAnnualInterestRate: 0,
       monthlyRevenueManwon: 5833,
-      targetMonthlyNetManwonPerEok: 200,
-      exitBuyerLtvPercent: 70,
-      exitMonthlyYieldPercent: 2,
+      targetMonthlyNetManwon: 2500,
     })
 
     expect(result.cashInvestedWithLoanEok).toBe(10.26)
-    expect(result.targetMonthlyNetManwon).toBe(2052)
-    expect(result.exitBuyerRequiredCashEok).toBe(22.5)
+    expect(result.targetMonthlyNetManwon).toBe(2500)
+    expect(result.targetMonthlyNetGapManwon).toBe(2000)
+    expect(result.exitBuyerRequiredCashEok).toBe(15)
     expect(result.exitEstimatedSalePriceEok).toBe(75)
   })
 
