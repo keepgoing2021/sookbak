@@ -155,7 +155,7 @@ export function calculatePurchaseDecision(
       status: 'needs-adjustment',
       label: '조건 조정 필요',
       headline: '수익 구조나 매입가 조정이 필요합니다',
-      message: `목표 월순수익보다 ${formatManwon(Math.abs(gapManwon))} 부족합니다.`,
+      message: `기준보다 ${formatManwon(Math.abs(gapManwon))} 부족합니다.`,
       action: '매입가 협상·객실 수익·공사비 가정을 다시 확인하세요.',
       gapManwon,
     }
@@ -165,7 +165,7 @@ export function calculatePurchaseDecision(
     status: 'expensive',
     label: '보수적으로 비쌈',
     headline: '보수적으로 보면 아직 비싼 매물입니다',
-    message: `목표 월순수익보다 ${formatManwon(Math.abs(gapManwon))} 부족합니다.`,
+    message: `기준보다 ${formatManwon(Math.abs(gapManwon))} 부족합니다.`,
     action: '현재 가격에서는 보류하거나 큰 폭의 가격 조정이 필요합니다.',
     gapManwon,
   }

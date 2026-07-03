@@ -416,7 +416,7 @@ function DirectPurchaseCalculator({
               inputMode="decimal"
             />
             <MoneyInput
-              label="월 매출 (에어비앤비)"
+              label="월 매출"
               unit="만원"
               value={values.monthlyRevenueManwon}
               onChange={(value) => updateFree('monthlyRevenueManwon', value)}
@@ -438,7 +438,7 @@ function DirectPurchaseCalculator({
         <strong>읽는 법</strong>
         <ul className="notice-list">
           <li>①번은 대출 이자 반영 후 실제 운영 수익률</li>
-          <li>월 수익률·목표 월순수익은 실투입금 기준</li>
+          <li>월 수익률은 실투입금 기준</li>
           <li>월 매출은 운영비·수수료 차감 후 순매출로 입력</li>
         </ul>
       </aside>
@@ -1413,8 +1413,7 @@ function DirectResultPanel({
           <Metric label="관광기금 월이자" value={formatManwon(result.tourismLoanMonthlyInterestManwon)} />
           <Metric label="총 월이자" value={formatManwon(result.totalMonthlyInterestManwon)} />
           <Metric label="월 순수익" value={formatManwon(result.monthlyNetManwon)} highlight />
-          <Metric label="목표 월순수익" value={formatManwon(result.targetMonthlyNetManwon)} />
-          <Metric label="목표 대비" value={formatManwonSigned(result.targetMonthlyNetGapManwon)} />
+
         </div>
 
         <LoanResilienceCard result={result} />
