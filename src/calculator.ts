@@ -16,7 +16,6 @@ export interface RecommendedPurchasePriceInput {
   monthlyNetManwon: number
   ltvPercent: number
   otherCostEok: number
-  targetMonthlyNetManwonPerEok?: number
 }
 
 export interface CalculatorInput {
@@ -31,9 +30,6 @@ export interface CalculatorInput {
   tourismLoanAmountEok?: number
   tourismLoanAnnualInterestRate?: number
   monthlyRevenueManwon: number
-  targetMonthlyNetManwonPerEok?: number
-  exitBuyerLtvPercent?: number
-  exitMonthlyYieldPercent?: number
 }
 
 export interface CalculatorResult {
@@ -159,7 +155,7 @@ export function calculatePurchaseDecision(
       status: 'needs-adjustment',
       label: '조건 조정 필요',
       headline: '수익 구조나 매입가 조정이 필요합니다',
-      message: `목표 월순수익보다 ${formatManwon(Math.abs(gapManwon))} 부족합니다.`,
+      message: `기준보다 ${formatManwon(Math.abs(gapManwon))} 부족합니다.`,
       action: '매입가 협상·객실 수익·공사비 가정을 다시 확인하세요.',
       gapManwon,
     }
@@ -169,7 +165,7 @@ export function calculatePurchaseDecision(
     status: 'expensive',
     label: '보수적으로 비쌈',
     headline: '보수적으로 보면 아직 비싼 매물입니다',
-    message: `목표 월순수익보다 ${formatManwon(Math.abs(gapManwon))} 부족합니다.`,
+    message: `기준보다 ${formatManwon(Math.abs(gapManwon))} 부족합니다.`,
     action: '현재 가격에서는 보류하거나 큰 폭의 가격 조정이 필요합니다.',
     gapManwon,
   }
@@ -180,7 +176,7 @@ export function calculateRecommendedPurchasePriceEok(
 ): number | null {
   if (input.monthlyNetManwon <= 0 || input.ltvPercent >= 100) return null
 
-  const targetCashEok = input.monthlyNetManwon / normalizePositive(input.targetMonthlyNetManwonPerEok, DEFAULT_TARGET_MONTHLY_NET_MANWON_PER_EOK)
+  const targetCashEok = input.monthlyNetManwon / DEFAULT_TARGET_MONTHLY_NET_MANWON_PER_EOK
   let low = 0
   let high = Math.max(1, targetCashEok / Math.max(0.01, 1 - input.ltvPercent / 100))
 
@@ -229,7 +225,7 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
   )
   const monthlyNetManwon = roundManwon(input.monthlyRevenueManwon - totalMonthlyInterestManwon)
   const targetMonthlyNetManwon = roundManwon(
-    cashInvestedWithLoanEok * normalizePositive(input.targetMonthlyNetManwonPerEok, DEFAULT_TARGET_MONTHLY_NET_MANWON_PER_EOK),
+    cashInvestedWithLoanEok * DEFAULT_TARGET_MONTHLY_NET_MANWON_PER_EOK,
   )
   const targetMonthlyNetGapManwon = roundManwon(monthlyNetManwon - targetMonthlyNetManwon)
   const annualNetManwon = roundManwon(monthlyNetManwon * 12)
@@ -241,13 +237,11 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
     ? roundPercent((monthlyNetManwon / (cashInvestedWithLoanEok * 10000)) * 100)
     : null
   const loanResilience = calculateLoanResilience(monthlyNetManwon, totalMonthlyInterestManwon)
-  const exitMonthlyYieldPercent = normalizePositive(input.exitMonthlyYieldPercent, DEFAULT_EXIT_MONTHLY_YIELD_PERCENT)
-  const exitBuyerLtvPercent = clamp(input.exitBuyerLtvPercent ?? DEFAULT_EXIT_BUYER_LTV_PERCENT, 0, 99.9)
   const exitBuyerRequiredCashEok = monthlyNetManwon > 0
-    ? roundEok(monthlyNetManwon / (exitMonthlyYieldPercent * 100))
+    ? roundEok(monthlyNetManwon / (DEFAULT_EXIT_MONTHLY_YIELD_PERCENT * 100))
     : null
   const exitEstimatedSalePriceEok = exitBuyerRequiredCashEok !== null
-    ? roundEok(exitBuyerRequiredCashEok / (1 - exitBuyerLtvPercent / 100))
+    ? roundEok(exitBuyerRequiredCashEok / (1 - DEFAULT_EXIT_BUYER_LTV_PERCENT / 100))
     : null
   const exitSalePriceGapEok = exitEstimatedSalePriceEok !== null
     ? roundEok(exitEstimatedSalePriceEok - input.purchasePriceEok)
@@ -350,14 +344,6 @@ function roundEok(value: number): number {
   return Math.round(value * 1000) / 1000
 }
 
-function normalizePositive(value: number | undefined, fallback: number): number {
-  return value !== undefined && Number.isFinite(value) && value > 0 ? value : fallback
-}
-
-function clamp(value: number, min: number, max: number): number {
-  if (!Number.isFinite(value)) return min
-  return Math.min(max, Math.max(min, value))
-}
 
 function roundManwon(value: number): number {
   return Math.round(value)
