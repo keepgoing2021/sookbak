@@ -25,7 +25,7 @@ describe('direct purchase calculator', () => {
 
   it('auto-calculates default fees from purchase price and supports acquisition tax override', () => {
     expect(defaultAcquisitionTaxEok('commercial', 12)).toBe(0.552)
-    expect(defaultAcquisitionTaxEok('commercial', 12, 9.4)).toBe(1.128)
+    expect(defaultAcquisitionTaxEok('commercial', 12, 10)).toBe(1.2)
     expect(defaultLegalFeeEok(12)).toBe(0.018)
     expect(defaultBrokerageFeeEok(12)).toBe(0.108)
     expect(defaultLoanAmountEok(12)).toBe(9.6)

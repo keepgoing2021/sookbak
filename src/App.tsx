@@ -306,19 +306,19 @@ function DirectPurchaseCalculator({
               ))}
             </div>
 
-            <label className={`risk-toggle ${values.acquisitionTaxRatePercent === '9.4' ? 'on' : ''}`}>
+            <label className={`risk-toggle ${values.acquisitionTaxRatePercent === '10' ? 'on' : ''}`}>
               <input
                 type="checkbox"
-                checked={values.acquisitionTaxRatePercent === '9.4'}
+                checked={values.acquisitionTaxRatePercent === '10'}
                 onChange={(event) => {
                   setValues((current) => ({
                     ...current,
-                    acquisitionTaxRatePercent: event.target.checked ? '9.4' : '',
+                    acquisitionTaxRatePercent: event.target.checked ? '10' : '',
                     acquisitionTaxEok: null,
                   }))
                 }}
               />
-              <span>과밀억제권역·5년 미만 법인 등 취득세 중과 9.4% 적용</span>
+              <span>취득세 중과 러프 적용: 표준세율 + 중과기준세율 × 2 ≈ 10%</span>
             </label>
 
             <div className="primary-input-block">
