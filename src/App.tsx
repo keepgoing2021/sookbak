@@ -59,6 +59,7 @@ type Values = {
   tourismLoanAmountEok: string
   tourismLoanAnnualInterestRate: string
   monthlyRevenueManwon: string
+  monthlyOperatingExpenseManwon: string
   acquisitionTaxRatePercent: string
 }
 
@@ -71,6 +72,7 @@ type FreeFieldKey =
   | 'tourismLoanAmountEok'
   | 'tourismLoanAnnualInterestRate'
   | 'monthlyRevenueManwon'
+  | 'monthlyOperatingExpenseManwon'
   | 'acquisitionTaxRatePercent'
 
 const propertyTypes: Array<{ key: PropertyType; label: string; description: string }> = [
@@ -91,6 +93,7 @@ const initialValues: Values = {
   tourismLoanAmountEok: '',
   tourismLoanAnnualInterestRate: String(DEFAULT_TOURISM_LOAN_ANNUAL_INTEREST_RATE),
   monthlyRevenueManwon: '',
+  monthlyOperatingExpenseManwon: '',
   acquisitionTaxRatePercent: '',
 }
 
@@ -214,6 +217,7 @@ function DirectPurchaseCalculator({
       tourismLoanAmountEok: toNumber(values.tourismLoanAmountEok),
       tourismLoanAnnualInterestRate: toNumber(values.tourismLoanAnnualInterestRate),
       monthlyRevenueManwon: toNumber(values.monthlyRevenueManwon),
+      monthlyOperatingExpenseManwon: toNumber(values.monthlyOperatingExpenseManwon),
     }),
     [
       propertyType,
@@ -227,6 +231,7 @@ function DirectPurchaseCalculator({
       values.tourismLoanAmountEok,
       values.tourismLoanAnnualInterestRate,
       values.monthlyRevenueManwon,
+      values.monthlyOperatingExpenseManwon,
     ],
   )
 
@@ -420,7 +425,14 @@ function DirectPurchaseCalculator({
               unit="만원"
               value={values.monthlyRevenueManwon}
               onChange={(value) => updateFree('monthlyRevenueManwon', value)}
-              help="운영비 차감 후 순매출"
+              help="운영비 차감 전 실제 월매출"
+            />
+            <MoneyInput
+              label="예상 운영비"
+              unit="만원"
+              value={values.monthlyOperatingExpenseManwon}
+              onChange={(value) => updateFree('monthlyOperatingExpenseManwon', value)}
+              help="인건비·청소·공과금·소모품 등 월 고정/변동비 합계"
             />
           </div>
         </section>
@@ -437,9 +449,9 @@ function DirectPurchaseCalculator({
       <aside className="notice">
         <strong>읽는 법</strong>
         <ul className="notice-list">
-          <li>①번은 대출 이자 반영 후 실제 운영 수익률</li>
+          <li>①번은 운영비와 대출 이자를 뺀 실제 순수익 기준</li>
           <li>월 수익률은 실투입금 기준</li>
-          <li>월 매출은 운영비·수수료 차감 후 순매출로 입력</li>
+          <li>월 매출은 운영비 차감 전 실제 매출로 입력</li>
         </ul>
       </aside>
     </>
@@ -1409,10 +1421,13 @@ function DirectResultPanel({
             label="실투입금"
             value={`${formatEok(result.cashInvestedWithLoanEok)} (총 ${formatEok(result.totalInvestmentEok)})`}
           />
+          <Metric label="월 매출" value={formatManwon(result.annualRevenueManwon / 12)} />
+          <Metric label="예상 운영비" value={formatManwon(result.monthlyOperatingExpenseManwon)} />
+          <Metric label="운영이익 (이자 전)" value={formatManwon(result.monthlyOperatingProfitManwon)} />
           <Metric label="담보대출 월이자" value={formatManwon(result.monthlyInterestManwon)} />
           <Metric label="관광기금 월이자" value={formatManwon(result.tourismLoanMonthlyInterestManwon)} />
           <Metric label="총 월이자" value={formatManwon(result.totalMonthlyInterestManwon)} />
-          <Metric label="월 순수익" value={formatManwon(result.monthlyNetManwon)} highlight />
+          <Metric label="실제 월 순수익" value={formatManwon(result.monthlyNetManwon)} highlight />
 
         </div>
 
@@ -1450,8 +1465,8 @@ function DirectResultPanel({
               </div>
 
               <div>
-                <dt>연 순매출</dt>
-                <dd>{formatManwon(result.annualRevenueManwon)}</dd>
+                <dt>연 운영이익</dt>
+                <dd>{formatManwon(result.monthlyOperatingProfitManwon * 12)}</dd>
               </div>
             </dl>
           </article>

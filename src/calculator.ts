@@ -30,6 +30,7 @@ export interface CalculatorInput {
   tourismLoanAmountEok?: number
   tourismLoanAnnualInterestRate?: number
   monthlyRevenueManwon: number
+  monthlyOperatingExpenseManwon?: number
 }
 
 export interface CalculatorResult {
@@ -39,6 +40,8 @@ export interface CalculatorResult {
   monthlyInterestManwon: number
   tourismLoanMonthlyInterestManwon: number
   totalMonthlyInterestManwon: number
+  monthlyOperatingExpenseManwon: number
+  monthlyOperatingProfitManwon: number
   monthlyNetManwon: number
   targetMonthlyNetManwon: number
   targetMonthlyNetGapManwon: number
@@ -223,7 +226,11 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
   const totalMonthlyInterestManwon = roundManwon(
     monthlyInterestManwon + tourismLoanMonthlyInterestManwon,
   )
-  const monthlyNetManwon = roundManwon(input.monthlyRevenueManwon - totalMonthlyInterestManwon)
+  const monthlyOperatingExpenseManwon = roundManwon(input.monthlyOperatingExpenseManwon ?? 0)
+  const monthlyOperatingProfitManwon = roundManwon(
+    input.monthlyRevenueManwon - monthlyOperatingExpenseManwon,
+  )
+  const monthlyNetManwon = roundManwon(monthlyOperatingProfitManwon - totalMonthlyInterestManwon)
   const targetMonthlyNetManwon = roundManwon(
     cashInvestedWithLoanEok * DEFAULT_TARGET_MONTHLY_NET_MANWON_PER_EOK,
   )
@@ -246,8 +253,9 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
   const exitSalePriceGapEok = exitEstimatedSalePriceEok !== null
     ? roundEok(exitEstimatedSalePriceEok - input.purchasePriceEok)
     : null
+  const annualOperatingProfitManwon = roundManwon(monthlyOperatingProfitManwon * 12)
   const roiNoLoanPercent = totalInvestmentEok > 0
-    ? roundPercent((annualRevenueManwon / (totalInvestmentEok * 10000)) * 100)
+    ? roundPercent((annualOperatingProfitManwon / (totalInvestmentEok * 10000)) * 100)
     : null
 
   return {
@@ -257,6 +265,8 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
     monthlyInterestManwon,
     tourismLoanMonthlyInterestManwon,
     totalMonthlyInterestManwon,
+    monthlyOperatingExpenseManwon,
+    monthlyOperatingProfitManwon,
     monthlyNetManwon,
     targetMonthlyNetManwon,
     targetMonthlyNetGapManwon,

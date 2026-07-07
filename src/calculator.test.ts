@@ -42,6 +42,30 @@ describe('direct purchase calculator', () => {
     expect(defaultLtvPercent(0, 8.4)).toBe(0)
   })
 
+  it('subtracts expected operating expenses from gross monthly revenue before profit metrics', () => {
+    const result = calculateInvestment({
+      propertyType: 'commercial',
+      purchasePriceEok: 10,
+      acquisitionTaxEok: 0.46,
+      legalFeeEok: 0.015,
+      brokerageFeeEok: 0.09,
+      otherCostEok: 0,
+      loanAmountEok: 4,
+      annualInterestRate: 6,
+      tourismLoanAmountEok: 0,
+      tourismLoanAnnualInterestRate: 0,
+      monthlyRevenueManwon: 1000,
+      monthlyOperatingExpenseManwon: 250,
+    })
+
+    expect(result.monthlyOperatingExpenseManwon).toBe(250)
+    expect(result.monthlyOperatingProfitManwon).toBe(750)
+    expect(result.monthlyInterestManwon).toBe(200)
+    expect(result.monthlyNetManwon).toBe(550)
+    expect(result.annualNetManwon).toBe(6600)
+    expect(result.roiNoLoanPercent).toBe(8.52)
+  })
+
   it('calculates leverage and no-loan ROI in manwon/eok units', () => {
     const result = calculateInvestment({
       propertyType: 'commercial',
