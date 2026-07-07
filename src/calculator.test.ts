@@ -151,7 +151,7 @@ describe('direct purchase calculator', () => {
     expect(result.loanResilienceMessage).toBe('이자 부담을 충분히 감당하는 편이에요.')
   })
 
-  it('includes tourism fund construction loan interest in total monthly interest', () => {
+  it('adds tourism fund construction loan amount to the total project cost display base', () => {
     const result = calculateInvestment({
       propertyType: 'commercial',
       purchasePriceEok: 12,
@@ -166,6 +166,9 @@ describe('direct purchase calculator', () => {
       monthlyRevenueManwon: 600,
     })
 
+    expect(result.totalInvestmentEok).toBe(12.678)
+    expect(result.totalProjectCostEok).toBe(14.678)
+    expect(result.cashInvestedWithLoanEok).toBe(4.278)
     expect(result.monthlyInterestManwon).toBe(315)
     expect(result.tourismLoanMonthlyInterestManwon).toBe(33)
     expect(result.totalMonthlyInterestManwon).toBe(348)

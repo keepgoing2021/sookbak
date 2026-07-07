@@ -1197,7 +1197,7 @@ function ConstructionRiskSection({
             <LinkedMetric label="매매가" value={directPurchasePrice > 0 ? formatEok(directPurchasePrice) : '미입력'} />
             <LinkedMetric
               label="실투입금"
-              value={directPurchasePrice > 0 ? `${formatEok(directResult.cashInvestedWithLoanEok)} (총 ${formatEok(directResult.totalInvestmentEok)})` : '미입력'}
+              value={directPurchasePrice > 0 ? `${formatEok(directResult.cashInvestedWithLoanEok)} (총 ${formatEok(directResult.totalProjectCostEok)})` : '미입력'}
             />
             <LinkedMetric label="월 순수익" value={directPurchasePrice > 0 ? formatManwon(directResult.monthlyNetManwon) : '미입력'} />
           </>
@@ -1422,7 +1422,7 @@ function DirectResultPanel({
             value={(
               <>
                 <em className="metric-primary-value">{formatEok(result.cashInvestedWithLoanEok)}</em>
-                <small className="metric-subvalue"> (총 {formatEok(result.totalInvestmentEok)})</small>
+                <small className="metric-subvalue"> (총 {formatEok(result.totalProjectCostEok)})</small>
               </>
             )}
           />

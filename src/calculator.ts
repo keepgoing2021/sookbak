@@ -36,6 +36,7 @@ export interface CalculatorInput {
 export interface CalculatorResult {
   sideCostsEok: number
   totalInvestmentEok: number
+  totalProjectCostEok: number
   cashInvestedWithLoanEok: number
   monthlyInterestManwon: number
   tourismLoanMonthlyInterestManwon: number
@@ -213,6 +214,7 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
     input.acquisitionTaxEok + input.legalFeeEok + input.brokerageFeeEok + input.otherCostEok,
   )
   const totalInvestmentEok = roundEok(input.purchasePriceEok + sideCostsEok)
+  const totalProjectCostEok = roundEok(totalInvestmentEok + (input.tourismLoanAmountEok ?? 0))
   const cashInvestedWithLoanEok = roundEok(totalInvestmentEok - input.loanAmountEok)
   const monthlyInterestManwon = roundManwon(
     (input.loanAmountEok * 10000 * (input.annualInterestRate / 100)) / 12,
@@ -261,6 +263,7 @@ export function calculateInvestment(input: CalculatorInput): CalculatorResult {
   return {
     sideCostsEok,
     totalInvestmentEok,
+    totalProjectCostEok,
     cashInvestedWithLoanEok,
     monthlyInterestManwon,
     tourismLoanMonthlyInterestManwon,
