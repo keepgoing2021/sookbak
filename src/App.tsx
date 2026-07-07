@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties, type Dispatch, type SetStateAction } from 'react'
+import { useMemo, useState, type CSSProperties, type Dispatch, type ReactNode, type SetStateAction } from 'react'
 import './App.css'
 import {
   type PropertyType,
@@ -1419,7 +1419,12 @@ function DirectResultPanel({
           <Metric label="부대비용 합계" value={formatEok(result.sideCostsEok)} />
           <Metric
             label="실투입금"
-            value={`${formatEok(result.cashInvestedWithLoanEok)} (총 ${formatEok(result.totalInvestmentEok)})`}
+            value={(
+              <>
+                <em className="metric-primary-value">{formatEok(result.cashInvestedWithLoanEok)}</em>
+                <small className="metric-subvalue"> (총 {formatEok(result.totalInvestmentEok)})</small>
+              </>
+            )}
           />
           <Metric label="월 매출" value={formatManwon(result.annualRevenueManwon / 12)} />
           <Metric label="예상 운영비" value={formatManwon(result.monthlyOperatingExpenseManwon)} />
@@ -1647,7 +1652,7 @@ function RentalResultPanel({
   )
 }
 
-function Metric({ label, value, highlight = false }: { label: string; value: string; highlight?: boolean }) {
+function Metric({ label, value, highlight = false }: { label: string; value: ReactNode; highlight?: boolean }) {
   return (
     <div className={highlight ? 'metric highlight' : 'metric'}>
       <span>{label}</span>

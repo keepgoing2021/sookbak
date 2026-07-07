@@ -414,6 +414,20 @@ h1 {
   letter-spacing: -0.03em;
 }
 
+.metric-primary-value {
+  font-style: normal;
+  font-size: 21px;
+  font-weight: 900;
+  color: #ff5b00;
+}
+
+.metric-subvalue {
+  color: #7c889d;
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
 .metric.highlight {
   background: #fff2e7;
 }
