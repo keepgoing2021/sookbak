@@ -6,7 +6,8 @@ export type RoomRevenueValues = {
   otaFeePercent: string
   variableCostPerOccupiedRoomManwon: string
   monthlyFixedCostManwon: string
-  totalInvestmentEok: string
+  totalProjectCostEok: string
+  myInvestmentEok: string
   targetMonthlyYieldPercent: string
   scenario: RoomRevenueScenarioKey
 }
@@ -17,7 +18,8 @@ export const initialRoomRevenueValues: RoomRevenueValues = {
   otaFeePercent: String(DEFAULT_ROOM_REVENUE_ASSUMPTIONS.otaFeePercent),
   variableCostPerOccupiedRoomManwon: String(DEFAULT_ROOM_REVENUE_ASSUMPTIONS.variableCostPerOccupiedRoomManwon),
   monthlyFixedCostManwon: String(DEFAULT_ROOM_REVENUE_ASSUMPTIONS.monthlyFixedCostManwon),
-  totalInvestmentEok: '',
+  totalProjectCostEok: '',
+  myInvestmentEok: '',
   targetMonthlyYieldPercent: String(DEFAULT_ROOM_REVENUE_ASSUMPTIONS.targetMonthlyYieldPercent),
   scenario: 'standard',
 }

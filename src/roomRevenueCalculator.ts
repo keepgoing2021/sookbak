@@ -12,7 +12,8 @@ export interface RoomRevenueInput {
   otaFeePercent: number
   variableCostPerOccupiedRoomManwon: number
   monthlyFixedCostManwon: number
-  totalInvestmentEok: number
+  totalProjectCostEok: number
+  myInvestmentEok: number
   targetMonthlyYieldPercent: number
 }
 
@@ -26,9 +27,12 @@ export interface RoomRevenueResult {
   totalOperatingCostManwon: number
   monthlyNetManwon: number
   annualNetManwon: number
+  equitySharePercent: number | null
+  monthlyExpectedDividendManwon: number | null
   annualYieldPercent: number | null
+  paybackMonths: number | null
   targetMonthlyNetManwon: number
-  targetGapManwon: number
+  targetGapManwon: number | null
 }
 
 export const DEFAULT_ROOM_REVENUE_ASSUMPTIONS = {
@@ -69,11 +73,26 @@ export function calculateRoomRevenue(input: RoomRevenueInput): RoomRevenueResult
   )
   const monthlyNetManwon = roundManwon(monthlyRevenueManwon - totalOperatingCostManwon)
   const annualNetManwon = roundManwon(monthlyNetManwon * 12)
-  const annualYieldPercent = input.totalInvestmentEok > 0
-    ? roundPercent((annualNetManwon / (input.totalInvestmentEok * 10000)) * 100)
+  const rawEquityShare = input.totalProjectCostEok > 0 && input.myInvestmentEok > 0
+    ? Math.min(1, input.myInvestmentEok / input.totalProjectCostEok)
+    : null
+  const equitySharePercent = rawEquityShare === null
+    ? null
+    : roundPercent(rawEquityShare * 100)
+  const rawMonthlyExpectedDividendManwon = rawEquityShare === null
+    ? null
+    : monthlyNetManwon * rawEquityShare
+  const monthlyExpectedDividendManwon = rawMonthlyExpectedDividendManwon === null
+    ? null
+    : roundDividend(rawMonthlyExpectedDividendManwon)
+  const annualYieldPercent = rawMonthlyExpectedDividendManwon !== null && input.myInvestmentEok > 0
+    ? roundPercent(((rawMonthlyExpectedDividendManwon * 12) / (input.myInvestmentEok * 10000)) * 100)
+    : null
+  const paybackMonths = rawMonthlyExpectedDividendManwon !== null && rawMonthlyExpectedDividendManwon > 0
+    ? roundMonths((input.myInvestmentEok * 10000) / rawMonthlyExpectedDividendManwon)
     : null
   const targetMonthlyNetManwon = roundManwon(
-    Math.max(0, input.totalInvestmentEok) * 10000 * (Math.max(0, input.targetMonthlyYieldPercent) / 100),
+    Math.max(0, input.myInvestmentEok) * 10000 * (Math.max(0, input.targetMonthlyYieldPercent) / 100),
   )
 
   return {
@@ -86,9 +105,14 @@ export function calculateRoomRevenue(input: RoomRevenueInput): RoomRevenueResult
     totalOperatingCostManwon,
     monthlyNetManwon,
     annualNetManwon,
+    equitySharePercent,
+    monthlyExpectedDividendManwon,
     annualYieldPercent,
+    paybackMonths,
     targetMonthlyNetManwon,
-    targetGapManwon: roundManwon(monthlyNetManwon - targetMonthlyNetManwon),
+    targetGapManwon: monthlyExpectedDividendManwon === null
+      ? null
+      : roundManwon(monthlyExpectedDividendManwon - targetMonthlyNetManwon),
   }
 }
 
@@ -111,8 +135,16 @@ function roundManwon(value: number): number {
   return Math.round(value)
 }
 
+function roundDividend(value: number): number {
+  return Math.round(value * 100) / 100
+}
+
 function roundPercent(value: number): number {
   return Math.round(value * 100) / 100
+}
+
+function roundMonths(value: number): number {
+  return Math.round(value * 10) / 10
 }
 
 function normalizeRoomCount(value: number): number {

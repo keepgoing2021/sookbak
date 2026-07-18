@@ -28,7 +28,8 @@ export function RoomRevenueCalculator({
     otaFeePercent: toNumber(values.otaFeePercent),
     variableCostPerOccupiedRoomManwon: toNumber(values.variableCostPerOccupiedRoomManwon),
     monthlyFixedCostManwon: toNumber(values.monthlyFixedCostManwon),
-    totalInvestmentEok: toNumber(values.totalInvestmentEok),
+    totalProjectCostEok: toNumber(values.totalProjectCostEok),
+    myInvestmentEok: toNumber(values.myInvestmentEok),
     targetMonthlyYieldPercent: toNumber(values.targetMonthlyYieldPercent),
   }), [values])
 
@@ -38,13 +39,14 @@ export function RoomRevenueCalculator({
     result: calculateRoomRevenueScenario(input, scenario.key),
   })), [input])
   const hasRoomInput = input.roomTypes.some((room) => room.roomCount > 0 && room.adrManwon > 0)
-  const hasInvestment = input.totalInvestmentEok > 0
+  const hasInvestment = input.totalProjectCostEok > 0 && input.myInvestmentEok > 0
   const activeScenario = scenarios.find((scenario) => scenario.key === values.scenario) ?? scenarios[1]
-  const judgment = !hasInvestment
-    ? { label: '투자금 입력 대기', tone: 'neutral', copy: '총 투자금을 입력하면 목표 월 순수익과 비교해요.' }
-    : result.targetGapManwon >= 0
-      ? { label: '목표 초과', tone: 'positive', copy: `목표보다 ${formatManwon(Math.abs(result.targetGapManwon))} 여유가 있어요.` }
-      : { label: '조건 조정 필요', tone: 'negative', copy: `목표보다 ${formatManwon(Math.abs(result.targetGapManwon))} 부족해요.` }
+  const targetGap = result.targetGapManwon
+  const judgment = !hasInvestment || targetGap === null
+    ? { label: '투자 조건 입력 대기', tone: 'neutral', copy: '총 사업비와 내 투자금을 입력하면 예상 배당과 비교해요.' }
+    : targetGap >= 0
+      ? { label: '목표 초과', tone: 'positive', copy: `목표 배당보다 ${formatManwon(Math.abs(targetGap))} 여유가 있어요.` }
+      : { label: '조건 조정 필요', tone: 'negative', copy: `목표 배당보다 ${formatManwon(Math.abs(targetGap))} 부족해요.` }
 
   const updateRoom = (id: number, key: 'name' | 'roomCount' | 'adrManwon', value: string) => {
     setValues((current) => ({
@@ -60,9 +62,16 @@ export function RoomRevenueCalculator({
   return (
     <>
       <header className="hero-copy room-revenue-hero">
-        <p className="eyebrow">다객실 매출·수익 시뮬레이터</p>
-        <h1 id="calculator-title">객실 수익 시뮬레이터</h1>
-        <p>객실 타입별 수량과 ADR을 넣고, 보수·기준·낙관 조건에서 월 순수익을 비교하세요. <strong>단위는 만원 / 억원</strong></p>
+        <div className="room-hero-main">
+          <p className="eyebrow">다객실 매출·수익 시뮬레이터</p>
+          <h1 id="calculator-title">객실 수익 시뮬레이터</h1>
+          <p className="room-hero-description">객실별 가격과 가동률을 조합해 월 손익과 투자 배당을 빠르게 비교하세요.</p>
+        </div>
+        <div className="room-hero-units" aria-label="입력 단위 안내">
+          <span>입력 단위</span>
+          <p>ADR·운영비 <strong>만원</strong></p>
+          <p>사업비·투자금 <strong>억원</strong></p>
+        </div>
       </header>
 
       <div className="room-scenario-tabs" role="tablist" aria-label="객실 수익 시나리오">
@@ -118,20 +127,28 @@ export function RoomRevenueCalculator({
             <RoomMetric label="객실 변동비" value={`-${formatManwon(result.variableCostManwon)}`} />
             <RoomMetric label="총 운영비" value={`-${formatManwon(result.totalOperatingCostManwon)}`} />
             <RoomMetric label="연 순수익" value={formatManwon(result.annualNetManwon)} />
-            <RoomMetric label="연 수익률" value={formatPercent(result.annualYieldPercent)} highlight />
           </div>
         </section>
       )}
 
       <section className="room-investment-panel" aria-labelledby="room-investment-title">
         <div className="room-investment-input">
-          <div className="room-investment-heading"><span>03</span><div><h2 id="room-investment-title">투자금 기준 판단</h2><p>내 투자금이 원하는 월 수익을 만드는지 확인해요.</p></div></div>
-          <SimpleInput id="room-total-investment" label="총 투자금" unit="억원" placeholder="예: 5" value={values.totalInvestmentEok} onChange={(value) => update('totalInvestmentEok', value)} />
-          <SimpleInput id="room-target-monthly-yield" label="목표 월 수익률" unit="%" value={values.targetMonthlyYieldPercent} onChange={(value) => update('targetMonthlyYieldPercent', value)} help="기본 3%, 직접 수정 가능" />
+          <div className="room-investment-heading"><span>03</span><div><h2 id="room-investment-title">지분 투자 수익</h2><p>사업비와 내 투자금을 기준으로 실제 배당 수익을 계산해요.</p></div></div>
+          <div className="room-investment-fields">
+            <SimpleInput id="room-total-project-cost" label="총 사업비" unit="억원" placeholder="예: 10" value={values.totalProjectCostEok} onChange={(value) => update('totalProjectCostEok', value)} />
+            <SimpleInput id="room-my-investment" label="내 투자금" unit="억원" placeholder="예: 5" value={values.myInvestmentEok} onChange={(value) => update('myInvestmentEok', value)} />
+            <SimpleInput id="room-target-monthly-yield" label="목표 월 수익률" unit="%" value={values.targetMonthlyYieldPercent} onChange={(value) => update('targetMonthlyYieldPercent', value)} help="내 투자금 대비 목표 배당률" />
+          </div>
         </div>
         <div className={`room-investment-result ${judgment.tone}`}>
-          <span>현재 조건 판단</span><strong>{judgment.label}</strong><p>{judgment.copy}</p>
-          <dl><div><dt>예상 월 순수익</dt><dd>{hasRoomInput ? formatManwon(result.monthlyNetManwon) : '-'}</dd></div><div><dt>필요 월 순수익</dt><dd>{hasInvestment ? formatManwon(result.targetMonthlyNetManwon) : '-'}</dd></div></dl>
+          <div className="room-investment-verdict"><span>현재 조건 판단</span><strong>{judgment.label}</strong><p>{judgment.copy}</p></div>
+          <dl className="room-investor-metrics">
+            <div><dt>지분율</dt><dd>{formatPercent(result.equitySharePercent)}</dd></div>
+            <div><dt>월 예상 배당</dt><dd>{formatNullableManwon(result.monthlyExpectedDividendManwon)}</dd></div>
+            <div><dt>연 수익률 (세전)</dt><dd>{formatPercent(result.annualYieldPercent)}</dd></div>
+            <div><dt>원금 회수</dt><dd>{formatPayback(result.paybackMonths)}</dd></div>
+          </dl>
+          <p className="room-investment-target">목표 월 배당 <strong>{hasInvestment ? formatManwon(result.targetMonthlyNetManwon) : '-'}</strong></p>
         </div>
       </section>
 
@@ -144,7 +161,7 @@ export function RoomRevenueCalculator({
         </div>
       </section>
 
-      <aside className="notice"><strong>읽는 법</strong><ul className="notice-list"><li>ADR은 객실 타입별 실제 평균 판매가로 입력하세요.</li><li>보수 시나리오는 ADR -10%, OCC -5%p를 적용합니다.</li><li>세금·감가상각·대출 원금은 제외한 1차 스크리닝 값입니다.</li></ul></aside>
+      <aside className="notice"><strong>읽는 법</strong><ul className="notice-list"><li>ADR은 객실 타입별 실제 평균 판매가로 입력하세요.</li><li>보수 시나리오는 ADR -10%, OCC -5%p를 적용합니다.</li><li>예상 배당은 월 순수익을 지분율대로 단순 안분한 값입니다.</li><li>세금·감가상각·대출 원금은 제외한 1차 스크리닝 값입니다.</li></ul></aside>
     </>
   )
 }
@@ -171,6 +188,18 @@ function formatManwon(value: number): string {
 }
 
 function formatPercent(value: number | null): string {
-  if (value === null) return '-'
+  if (value === null) return '–'
   return `${new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 2 }).format(value)}%`
+}
+
+function formatNullableManwon(value: number | null): string {
+  if (value === null) return '–'
+  const maximumFractionDigits = Math.abs(value) < 100 ? 2 : 0
+  return `${new Intl.NumberFormat('ko-KR', { maximumFractionDigits }).format(value)}만원`
+}
+
+function formatPayback(months: number | null): string {
+  if (months === null) return '–'
+  if (months >= 24) return `${new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 1 }).format(months / 12)}년`
+  return `${new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 1 }).format(months)}개월`
 }

@@ -3029,6 +3029,55 @@ h1,
 }
 
 /* Multi-room revenue simulator */
+.room-revenue-hero {
+  display: block;
+  max-width: none;
+  margin: 0 0 24px;
+  padding-right: 0;
+  text-align: left;
+}
+
+.room-hero-description {
+  max-width: 700px !important;
+  margin: 10px 0 0 !important;
+  line-height: 1.65;
+}
+
+.room-hero-units {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.room-hero-units > span {
+  margin-right: 2px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.room-hero-units p {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  margin: 0 !important;
+  padding: 7px 11px;
+  border: 1px solid #dbe6f4;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.room-hero-units strong {
+  color: #1d4ed8;
+  font-size: 12px;
+}
+
 .room-scenario-tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3279,7 +3328,7 @@ h1,
 
 .room-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 1px;
   background: rgba(255, 255, 255, 0.12);
 }
@@ -3311,9 +3360,33 @@ h1,
 
 .room-investment-panel {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: 12px;
   margin-top: 16px;
+}
+
+.room-investment-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.room-investment-fields .input-row {
+  grid-template-columns: 1fr;
+  gap: 8px;
+  align-content: start;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 13px;
+  background: #f8fafc;
+}
+
+.room-investment-fields .input-wrap {
+  width: 100%;
+}
+
+.room-investment-fields .input-row > div:first-child {
+  min-height: 42px;
 }
 
 .room-investment-input,
@@ -3357,13 +3430,13 @@ h1,
   font-size: 12px;
 }
 
-.room-investment-result > span {
+.room-investment-verdict > span {
   color: #64748b;
   font-size: 12px;
   font-weight: 850;
 }
 
-.room-investment-result > strong {
+.room-investment-verdict > strong {
   display: block;
   margin-top: 8px;
   color: #0f172a;
@@ -3376,35 +3449,54 @@ h1,
   background: linear-gradient(135deg, #ecfdf5, #ffffff);
 }
 
-.room-investment-result.positive > strong { color: #047857; }
+.room-investment-result.positive .room-investment-verdict > strong { color: #047857; }
 .room-investment-result.negative { border-color: #fecaca; background: linear-gradient(135deg, #fef2f2, #ffffff); }
-.room-investment-result.negative > strong { color: #dc2626; }
+.room-investment-result.negative .room-investment-verdict > strong { color: #dc2626; }
 
-.room-investment-result dl {
+.room-investor-metrics {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
   margin: 18px 0 0;
 }
 
-.room-investment-result dl div {
+.room-investor-metrics div {
+  min-width: 0;
   padding: 12px;
   border: 1px solid #dbe6f4;
   border-radius: 13px;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.82);
 }
 
 .room-investment-result dt {
+  min-height: 28px;
   color: #64748b;
   font-size: 11px;
   font-weight: 800;
+  line-height: 1.35;
 }
 
 .room-investment-result dd {
-  margin: 6px 0 0;
+  margin: 5px 0 0;
   color: #0f172a;
-  font-size: 17px;
+  font-size: clamp(16px, 1.7vw, 20px);
   font-weight: 900;
+  letter-spacing: -0.035em;
+  white-space: nowrap;
+}
+
+.room-investment-result .room-investment-target {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #dbe6f4;
+  color: #64748b;
+  font-weight: 750;
+}
+
+.room-investment-target strong {
+  color: #0f172a;
 }
 
 .room-scenario-comparison {
@@ -3500,7 +3592,23 @@ h1,
     flex-direction: column;
   }
 
-  .room-investment-result dl {
+  .room-investor-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 440px) {
+  .room-hero-units {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .room-hero-units > span {
+    width: 100%;
+  }
+
+  .room-investment-fields,
+  .room-investor-metrics {
     grid-template-columns: 1fr;
   }
 }
