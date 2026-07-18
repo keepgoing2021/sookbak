@@ -43,9 +43,11 @@ import {
   buildConstructionChecklist,
   type ConstructionChecklistInput,
 } from './constructionChecklist'
+import { RoomRevenueCalculator } from './RoomRevenueSection'
+import { initialRoomRevenueValues, type RoomRevenueValues } from './roomRevenueState'
 
-type CalculatorTab = 'direct' | 'rental' | 'risk'
-type RiskSourceMode = Exclude<CalculatorTab, 'risk'>
+type CalculatorTab = 'direct' | 'rental' | 'room' | 'risk'
+type RiskSourceMode = 'direct' | 'rental'
 
 type Values = {
   purchasePriceEok: string
@@ -100,6 +102,7 @@ const initialValues: Values = {
 const tabs: Array<{ key: CalculatorTab; label: string; eyebrow: string }> = [
   { key: 'direct', label: '직접 매입', eyebrow: '직접 매입 투자 의사결정 도구' },
   { key: 'rental', label: '임대 운영', eyebrow: '임대 운영 수익률 의사결정 도구' },
+  { key: 'room', label: '객실 수익', eyebrow: '다객실 매출·수익 시뮬레이터' },
   { key: 'risk', label: '공사·인허가', eyebrow: '공사·인허가 리스크 체크 도구' },
 ]
 
@@ -109,10 +112,11 @@ function App() {
   const [directPropertyType, setDirectPropertyType] = useState<PropertyType>('commercial')
   const [directValues, setDirectValues] = useState<Values>(initialValues)
   const [rentalValues, setRentalValues] = useState<RentalValues>(initialRentalValues)
+  const [roomRevenueValues, setRoomRevenueValues] = useState<RoomRevenueValues>(initialRoomRevenueValues)
 
   const selectTab = (tab: CalculatorTab) => {
     setActiveTab(tab)
-    if (tab !== 'risk') {
+    if (tab === 'direct' || tab === 'rental') {
       setRiskInitialMode(tab)
     }
   }
@@ -148,6 +152,8 @@ function App() {
           />
         ) : activeTab === 'rental' ? (
           <RentalCalculator values={rentalValues} setValues={setRentalValues} />
+        ) : activeTab === 'room' ? (
+          <RoomRevenueCalculator values={roomRevenueValues} setValues={setRoomRevenueValues} />
         ) : (
           <ConstructionRiskSection
             directValues={directValues}
