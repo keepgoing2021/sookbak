@@ -15,7 +15,8 @@ const baseInput = {
   otaFeePercent: 15,
   variableCostPerOccupiedRoomManwon: 2,
   monthlyFixedCostManwon: 500,
-  totalInvestmentEok: 5,
+  totalProjectCostEok: 10,
+  myInvestmentEok: 5,
   targetMonthlyYieldPercent: 3,
 }
 
@@ -32,9 +33,12 @@ describe('room revenue simulator', () => {
     expect(result.totalOperatingCostManwon).toBe(1374)
     expect(result.monthlyNetManwon).toBe(1650)
     expect(result.annualNetManwon).toBe(19800)
-    expect(result.annualYieldPercent).toBe(39.6)
+    expect(result.equitySharePercent).toBe(50)
+    expect(result.monthlyExpectedDividendManwon).toBe(825)
+    expect(result.annualYieldPercent).toBe(19.8)
+    expect(result.paybackMonths).toBe(60.6)
     expect(result.targetMonthlyNetManwon).toBe(1500)
-    expect(result.targetGapManwon).toBe(150)
+    expect(result.targetGapManwon).toBe(-675)
   })
 
   it('applies conservative/base/optimistic scenario adjustments without mutating the base input', () => {
@@ -104,5 +108,40 @@ describe('room revenue simulator', () => {
       monthlyFixedCostManwon: 500,
       targetMonthlyYieldPercent: 3,
     })
+  })
+
+  it('keeps a positive payback period when a small dividend rounds below one manwon', () => {
+    const result = calculateRoomRevenue({
+      ...baseInput,
+      roomTypes: [{ name: '소형', roomCount: 1, adrManwon: 1 }],
+      occupancyPercent: 100,
+      otaFeePercent: 0,
+      variableCostPerOccupiedRoomManwon: 0,
+      monthlyFixedCostManwon: 29,
+      totalProjectCostEok: 100,
+      myInvestmentEok: 1,
+    })
+
+    expect(result.equitySharePercent).toBe(1)
+    expect(result.monthlyExpectedDividendManwon).toBe(0.01)
+    expect(result.paybackMonths).toBe(1000000)
+  })
+
+  it('returns empty investor metrics when project cost or distributable profit is missing', () => {
+    const noProjectCost = calculateRoomRevenue({
+      ...baseInput,
+      totalProjectCostEok: 0,
+    })
+    const noDividend = calculateRoomRevenue({
+      ...baseInput,
+      monthlyFixedCostManwon: 10000,
+    })
+
+    expect(noProjectCost.equitySharePercent).toBeNull()
+    expect(noProjectCost.monthlyExpectedDividendManwon).toBeNull()
+    expect(noProjectCost.annualYieldPercent).toBeNull()
+    expect(noProjectCost.paybackMonths).toBeNull()
+    expect(noDividend.monthlyExpectedDividendManwon).toBeLessThan(0)
+    expect(noDividend.paybackMonths).toBeNull()
   })
 })
